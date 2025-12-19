@@ -33,6 +33,10 @@ public class LoginActivity extends AppCompatActivity {
                 Toast.makeText(this, "Email dan Password tidak boleh kosong", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(this, "Login berhasil (dummy)", Toast.LENGTH_SHORT).show();
+
+                Intent intent = new Intent(LoginActivity.this, BookingStep1Activity.class);
+                startActivity(intent);
+                finish();
             }
         });
 
