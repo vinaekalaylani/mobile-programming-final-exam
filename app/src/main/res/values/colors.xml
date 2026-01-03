@@ -7,18 +7,23 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="primary">#FBBF24</color>
-    <color name="secondary">#16283D</color>
 
-    <!-- Profile Item Colors -->
-    <color name="email_icon_background">#FFFDE7</color>
-    <color name="email_icon_tint">#FFC107</color>
-    <color name="phone_icon_background">#E8EAF6</color>
-    <color name="phone_icon_tint">#1A237E</color>
-    <color name="date_icon_background">#E3F2FD</color>
-    <color name="date_icon_tint">#2196F3</color>
-    <color name="location_icon_background">#E8F5E9</color>
-    <color name="location_icon_tint">#4CAF50</color>
-    <color name="work_icon_background">#F3E5F5</color>
-    <color name="work_icon_tint">#9C27B0</color>
+    <color name="primary">#1A237E</color>
+    <color name="primary_dark">#000051</color>
+    <color name="primary_light">#534BAE</color>
+    <color name="accent">#FFC107</color>
+    <color name="secondary">#FFC107</color> <!-- FIX: Menambahkan kembali warna secondary yang hilang -->
+
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+
+    <!-- ### WARNA UNTUK ICON BACKGROUND ### -->
+    <color name="bg_icon_color_email">#FFC107</color>
+    <color name="bg_icon_color_phone">#0D47A1</color>
+    <color name="bg_icon_color_birth">#2979FF</color>
+    <color name="bg_icon_color_address">#00C853</color>
+    <color name="bg_icon_color_job">#8E24AA</color>
+
+    <color name="logout_button_stroke">#D32F2F</color>
+    <color name="item_stroke_color">#E0E0E0</color>
 </resources>
