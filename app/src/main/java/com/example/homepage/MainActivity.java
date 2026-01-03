@@ -8,6 +8,9 @@ import android.widget.ImageView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
+import com.vinaekal.sisehat.ProfilActivity;
+import com.vinaekal.sisehat.R;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override

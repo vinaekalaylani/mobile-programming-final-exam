@@ -21,4 +21,5 @@
     <color name="location_icon_tint">#4CAF50</color>
     <color name="work_icon_background">#F3E5F5</color>
     <color name="work_icon_tint">#9C27B0</color>
+    <color name="blue_sisehat">#2196F3</color>
 </resources>

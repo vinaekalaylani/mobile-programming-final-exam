@@ -1,4 +1,4 @@
-package com.example.homepage;
+package com.vinaekal.sisehat;
 
 import android.os.Bundle;
 import android.view.View;
@@ -8,6 +8,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.homepage.ProfileAdapter;
+import com.example.homepage.ProfileItem;
 import com.vinaekal.sisehat.R;
 
 import java.util.ArrayList;
