@@ -87,8 +87,9 @@
                         <ImageView
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:contentDescription="Avatar Profil"
                             android:padding="20dp"
-                            android:src="@drawable/ic_account_circle"
+                            android:src="@drawable/ic_person_glyph"
                             app:tint="@color/white" />
 
                     </FrameLayout>
