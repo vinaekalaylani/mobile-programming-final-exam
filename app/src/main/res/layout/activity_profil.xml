@@ -71,19 +71,27 @@
                     android:layout_height="wrap_content"
                     android:padding="16dp">
 
-                    <com.google.android.material.image.ShapeableImageView
+                    <FrameLayout
                         android:id="@+id/profile_image"
                         android:layout_width="80dp"
                         android:layout_height="80dp"
-                        android:padding="16dp"
-                        app:srcCompat="@drawable/ic_account_circle"
-                        app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CircleImageView"
-                        app:strokeColor="@color/clr_btn_edit_bg"
-                        app:strokeWidth="4dp"
-                        app:tint="@color/white"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"/>
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/bg_avatar_circle_final" />
+
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:padding="20dp"
+                            android:src="@drawable/ic_account_circle"
+                            app:tint="@color/white" />
+
+                    </FrameLayout>
 
                     <TextView
                         android:id="@+id/tv_name"

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Lapisan 1: Latar belakang lingkaran biru -->
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@color/clr_appbar_primary" />
+        </shape>
+    </item>
+    <!-- Lapisan 2: Ikon yang sudah diberi warna putih dan padding -->
+    <item
+        android:left="16dp"
+        android:top="16dp"
+        android:right="16dp"
+        android:bottom="16dp">
+        <bitmap
+            android:src="@drawable/ic_account_circle"
+            android:tint="@color/white" />
+    </item>
+</layer-list>
