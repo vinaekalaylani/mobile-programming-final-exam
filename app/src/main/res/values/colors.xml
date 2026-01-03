@@ -26,4 +26,11 @@
 
     <color name="logout_button_stroke">#D32F2F</color>
     <color name="item_stroke_color">#E0E0E0</color>
+
+    <!-- New color tokens -->
+    <color name="clr_background">#F5F5F5</color>
+    <color name="clr_appbar_primary">#1A237E</color>
+    <color name="clr_btn_edit_bg">#FFC107</color>
+    <color name="clr_text_primary">#212121</color>
+    <color name="clr_btn_logout_stroke">#D32F2F</color>
 </resources>

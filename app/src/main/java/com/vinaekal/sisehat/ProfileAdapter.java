@@ -1,3 +1,4 @@
+// Final ProfileAdapter v8 (Manual Override)
 package com.vinaekal.sisehat;
 
 import android.content.Context;
@@ -6,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DiffUtil;
@@ -25,7 +25,7 @@ public class ProfileAdapter extends ListAdapter<ProfileItem, ProfileAdapter.Prof
     @NonNull
     @Override
     public ProfileViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_profile_info, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_profile_info, parent, false);
         return new ProfileViewHolder(view);
     }
 
@@ -35,19 +35,19 @@ public class ProfileAdapter extends ListAdapter<ProfileItem, ProfileAdapter.Prof
     }
 
     static class ProfileViewHolder extends RecyclerView.ViewHolder {
-
         private final ImageView icon;
         private final TextView label;
         private final TextView value;
 
-        public ProfileViewHolder(@NonNull View itemView) {
+        ProfileViewHolder(@NonNull View itemView) {
             super(itemView);
             icon = itemView.findViewById(R.id.iv_icon);
             label = itemView.findViewById(R.id.tv_label);
             value = itemView.findViewById(R.id.tv_value);
         }
 
-        public void bind(ProfileItem item, Context context) {
+        // KUNCI PERBAIKAN: Logika untuk memilih ikon dan background yang berbeda
+        void bind(ProfileItem item, Context context) {
             label.setText(item.getLabel());
             value.setText(item.getValue());
 
@@ -77,12 +77,8 @@ public class ProfileAdapter extends ListAdapter<ProfileItem, ProfileAdapter.Prof
                     break;
             }
 
-            if (iconRes != 0) {
-                icon.setImageResource(iconRes);
-            }
-            if (backgroundRes != 0) {
-                icon.setBackground(ContextCompat.getDrawable(context, backgroundRes));
-            }
+            icon.setImageResource(iconRes);
+            icon.setBackground(ContextCompat.getDrawable(context, backgroundRes));
         }
     }
 

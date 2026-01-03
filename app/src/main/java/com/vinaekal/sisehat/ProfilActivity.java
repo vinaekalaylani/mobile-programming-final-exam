@@ -2,18 +2,12 @@ package com.vinaekal.sisehat;
 
 import android.animation.ObjectAnimator;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.ImageView;
-
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
+import androidx.appcompat.widget.Toolbar;
 import com.google.android.material.button.MaterialButton;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class ProfilActivity extends AppCompatActivity {
 
@@ -22,20 +16,12 @@ public class ProfilActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profil);
 
-        ImageView backArrow = findViewById(R.id.back_arrow);
-        setClickAnimation(backArrow);
-        backArrow.setOnClickListener(v -> finish());
-
-        RecyclerView recyclerView = findViewById(R.id.profile_items_recyclerview);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setItemAnimator(null);
-        recyclerView.setNestedScrollingEnabled(false);
-
-        ProfileAdapter adapter = new ProfileAdapter(this);
-        recyclerView.setAdapter(adapter);
-
-        adapter.submitList(getProfileData());
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowTitleEnabled(true);
+        }
 
         MaterialButton editProfileButton = findViewById(R.id.btn_edit_profil);
         MaterialButton logoutButton = findViewById(R.id.btn_keluar);
@@ -43,14 +29,13 @@ public class ProfilActivity extends AppCompatActivity {
         setClickAnimation(logoutButton);
     }
 
-    private List<ProfileItem> getProfileData() {
-        List<ProfileItem> profileItems = new ArrayList<>();
-        profileItems.add(new ProfileItem(ProfileItem.Type.EMAIL, getString(R.string.label_email), getString(R.string.dummy_email)));
-        profileItems.add(new ProfileItem(ProfileItem.Type.PHONE, getString(R.string.label_nomor_telepon), getString(R.string.dummy_phone)));
-        profileItems.add(new ProfileItem(ProfileItem.Type.BIRTHDATE, getString(R.string.label_tanggal_lahir), getString(R.string.dummy_birthdate)));
-        profileItems.add(new ProfileItem(ProfileItem.Type.ADDRESS, getString(R.string.label_alamat), getString(R.string.dummy_address)));
-        profileItems.add(new ProfileItem(ProfileItem.Type.JOB, getString(R.string.label_pekerjaan), getString(R.string.dummy_job)));
-        return profileItems;
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void setClickAnimation(View view) {
