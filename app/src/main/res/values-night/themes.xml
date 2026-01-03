@@ -19,4 +19,5 @@
         <item name="android:windowIsTranslucent">true</item>
         <item name="colorPrimary">@color/primary</item>
     </style>
+
 </resources>

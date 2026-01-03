@@ -43,7 +43,8 @@
                     android:id="@+id/etPeserta"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
-                    android:background="@drawable/bg_input_border"
+                    android:background="@drawable/bg_edittext"
+                    android:textColor="@color/black"
                     android:hint="Pilih Peserta"
                     android:paddingStart="12dp" />
 
@@ -52,7 +53,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="120dp"
                     android:layout_marginTop="16dp"
-                    android:background="@drawable/bg_input_border"
+                    android:background="@drawable/bg_edittext"
+                    android:textColor="@color/black"
                     android:gravity="top|start"
                     android:hint="Masukkan catatan tambahan (opsional)"
                     android:padding="12dp" />

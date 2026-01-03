@@ -43,7 +43,8 @@
                     android:id="@+id/etFormPendaftaran"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
-                    android:background="@drawable/bg_input_border"
+                    android:background="@drawable/bg_edittext"
+                    android:textColor="@color/black"
                     android:hint="Form Pendaftaran"
                     android:paddingStart="12dp" />
 
@@ -52,7 +53,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:layout_marginTop="12dp"
-                    android:background="@drawable/bg_input_border"
+                    android:background="@drawable/bg_edittext"
+                    android:textColor="@color/black"
                     android:hint="Pilih Rumah Sakit"
                     android:paddingStart="12dp" />
 
@@ -61,7 +63,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:layout_marginTop="12dp"
-                    android:background="@drawable/bg_input_border"
+                    android:background="@drawable/bg_edittext"
+                    android:textColor="@color/black"
                     android:hint="Pilih Poliklinik"
                     android:paddingStart="12dp" />
 
@@ -70,7 +73,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:layout_marginTop="12dp"
-                    android:background="@drawable/bg_input_border"
+                    android:background="@drawable/bg_edittext"
+                    android:textColor="@color/black"
                     android:hint="Pilih Dokter"
                     android:paddingStart="12dp" />
             </LinearLayout>
