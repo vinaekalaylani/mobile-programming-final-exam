@@ -1,3 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Si Sehat</string>
+
+    <string name="profil_saya">Profil Saya</string>
+    <string name="kelola_informasi_profil_anda">Kelola informasi profil Anda</string>
+
+    <string name="label_email">Email</string>
+    <string name="label_nomor_telepon">Nomor Telepon</string>
+    <string name="label_tanggal_lahir">Tanggal Lahir</string>
+    <string name="label_alamat">Alamat</string>
+    <string name="label_pekerjaan">Pekerjaan</string>
+
+    <string name="dummy_email">john.doe@example.com</string>
+    <string name="dummy_phone">081234567890</string>
+    <string name="dummy_birthdate">1 Januari 1990</string>
+    <string name="dummy_address">Jalan Jenderal Sudirman No. 1, Jakarta</string>
+    <string name="dummy_job">Android Developer</string>
+    <string name="dummy_name">John Doe</string>
+    <string name="dummy_id">ID: 3201234567890123</string>
+
+    <string name="edit_profil">Edit Profil</string>
+    <string name="keluar">Keluar</string>
 </resources>

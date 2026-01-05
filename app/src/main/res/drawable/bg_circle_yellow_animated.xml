@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Lingkaran biru sebagai latar belakang statis -->
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@color/primary" />
+        </shape>
+    </item>
+    <!-- Lingkaran kuning yang akan berputar -->
+    <item>
+        <rotate
+            android:fromDegrees="0"
+            android:toDegrees="360"
+            android:pivotX="50%"
+            android:pivotY="50%">
+            <shape
+                android:shape="ring"
+                android:innerRadiusRatio="2.5"
+                android:thicknessRatio="25"
+                android:useLevel="false">
+                <gradient
+                    android:type="sweep"
+                    android:startColor="@color/secondary" 
+                    android:centerColor="@color/secondary" 
+                    android:endColor="@android:color/transparent" />
+            </shape>
+        </rotate>
+    </item>
+</layer-list>
