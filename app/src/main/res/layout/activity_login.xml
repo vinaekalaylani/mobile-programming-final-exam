@@ -70,10 +70,10 @@
             android:layout_height="50dp"
             android:layout_marginTop="24dp"
             android:text="Log in"
-            android:background="@drawable/bg_button"
+            android:backgroundTint="@color/accent"
             android:textAllCaps="false"
             android:textStyle="bold"
-            android:textColor="@color/white"/>
+            android:textColor="@color/text_primary"/>
 
         <TextView
             android:id="@+id/textDescription"
