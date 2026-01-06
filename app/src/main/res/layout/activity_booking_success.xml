@@ -9,12 +9,13 @@
     android:padding="24dp">
 
     <ImageView
-        android:id="@+id/ivLogoSisehat"
-        android:layout_width="140dp"
-        android:layout_height="140dp"
+        android:id="@+id/logoLogin"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
         android:layout_marginTop="20dp"
         android:adjustViewBounds="true"
-        android:src="@drawable/logo_sisehat" />
+        android:src="@drawable/circlelogo"
+        android:contentDescription="Logo" />
 
     <TextView
         android:layout_width="wrap_content"

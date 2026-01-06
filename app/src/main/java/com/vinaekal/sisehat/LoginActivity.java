@@ -34,7 +34,7 @@ public class LoginActivity extends AppCompatActivity {
         // 🔹 Auto-login
         Session session = new Session(this);
         if (session.isLoggedIn()) {
-            startActivity(new Intent(this, BookingStep1Activity.class));
+            startActivity(new Intent(this, MainActivity.class));
             finish();
             return;
         }
@@ -78,7 +78,7 @@ public class LoginActivity extends AppCompatActivity {
 
                         Toast.makeText(LoginActivity.this, "Login berhasil", Toast.LENGTH_SHORT).show();
 
-                        startActivity(new Intent(LoginActivity.this, BookingStep1Activity.class));
+                        startActivity(new Intent(LoginActivity.this, MainActivity.class));
                         finish();
 
                     } else {

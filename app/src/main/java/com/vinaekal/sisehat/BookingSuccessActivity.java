@@ -1,5 +1,6 @@
 package com.vinaekal.sisehat;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
@@ -28,6 +29,7 @@ public class BookingSuccessActivity extends AppCompatActivity {
 
         // Logika Tombol Selesai
         btnBack.setOnClickListener(v -> {
+            startActivity(new Intent(this, MainActivity.class));
             finish(); // Menutup halaman sukses dan kembali
         });
     }

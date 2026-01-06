@@ -1,13 +1,17 @@
 package com.vinaekal.sisehat;
 
 import android.animation.ObjectAnimator;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import com.google.android.material.button.MaterialButton;
+import com.vinaekal.sisehat.util.Session;
 
 public class ProfilActivity extends AppCompatActivity {
 
@@ -23,6 +27,10 @@ public class ProfilActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayShowTitleEnabled(true);
         }
 
+        Button buttonKeluar = findViewById(R.id.btn_keluar);
+
+        buttonKeluar.setOnClickListener(v -> logout());
+
         MaterialButton editProfileButton = findViewById(R.id.btn_edit_profil);
         MaterialButton logoutButton = findViewById(R.id.btn_keluar);
         setClickAnimation(editProfileButton);
@@ -36,6 +44,16 @@ public class ProfilActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void logout() {
+        Session session = new Session(this);
+        session.clear();
+
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
     }
 
     private void setClickAnimation(View view) {
