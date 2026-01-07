@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+
+    <!-- Memberi bentuk ini badan yang transparan agar garis tepinya pasti digambar -->
+    <solid android:color="@android:color/transparent" />
+
+    <!-- Menggambar garis tepi kuning yang putus-putus -->
+    <stroke
+        android:width="8dp"
+        android:color="#FFC107"
+        android:dashWidth="25dp"
+        android:dashGap="15dp" />
+</shape>
