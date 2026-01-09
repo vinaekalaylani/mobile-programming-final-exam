@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+
+    <!-- Memberi bentuk ini badan transparan agar garisnya pasti terlihat -->
+    <solid android:color="@android:color/transparent" />
+
+    <!-- Trik: Membuat jarak antar garis sangat panjang sehingga hanya satu garis yang terlihat -->
+    <stroke
+        android:width="8dp"
+        android:color="#FFC107"
+        android:dashWidth="60dp" 
+        android:dashGap="1000dp" />
+</shape>
