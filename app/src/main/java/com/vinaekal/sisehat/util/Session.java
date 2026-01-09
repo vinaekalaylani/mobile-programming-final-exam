@@ -7,7 +7,8 @@ public class Session {
 
     private static final String PREF_NAME = "sisehat_session";
     private static final String KEY_TOKEN = "jwt_token";
-    private static final String KEY_USERNAME = "username"; // ✨ tambahan
+    private static final String KEY_USERNAME = "username";
+    private static final String KEY_USERID = "user_id";
 
     SharedPreferences pref;
     SharedPreferences.Editor editor;
@@ -35,6 +36,16 @@ public class Session {
 
     public String getUsername() {
         return pref.getString(KEY_USERNAME, "User");
+    }
+
+    // User ID
+    public void saveUserId(int userId) {
+        editor.putInt(KEY_USERID, userId);
+        editor.apply();
+    }
+
+    public int getUserId() {
+        return pref.getInt(KEY_USERID, -1); // -1 jika belum ada
     }
 
     // ===== Clear / Logout =====

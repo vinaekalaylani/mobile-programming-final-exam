@@ -76,6 +76,7 @@ public class LoginActivity extends AppCompatActivity {
                         Session session = new Session(LoginActivity.this);
                         session.saveToken(body.getContent().getToken());
                         session.saveUsername(body.getContent().getUser().getUsername());
+                        session.saveUserId(body.getContent().getUser().getId());
 
                         Toast.makeText(LoginActivity.this, "Login berhasil", Toast.LENGTH_SHORT).show();
 

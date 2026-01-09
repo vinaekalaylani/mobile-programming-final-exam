@@ -1,6 +1,8 @@
 package com.vinaekal.sisehat.network;
 
+import com.vinaekal.sisehat.model.content.BookingContent;
 import com.vinaekal.sisehat.model.content.RegisterContent;
+import com.vinaekal.sisehat.model.request.BookingRequest;
 import com.vinaekal.sisehat.model.request.RegisterRequest;
 import com.vinaekal.sisehat.model.response.ApiResponse;
 import com.vinaekal.sisehat.model.content.LoginContent;
@@ -17,4 +19,9 @@ public interface ApiService {
 
     @POST("user/register")
     Call<ApiResponse<RegisterContent>> register(@Body RegisterRequest request);
+
+    @POST("user/booking")
+    Call<ApiResponse<BookingContent>> createBooking(@Body BookingRequest request);
+
+
 }

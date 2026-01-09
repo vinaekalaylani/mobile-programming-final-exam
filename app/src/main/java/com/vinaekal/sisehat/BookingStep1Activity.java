@@ -1,117 +1,130 @@
 package com.vinaekal.sisehat;
 
 import android.app.DatePickerDialog;
-import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
-import android.widget.LinearLayout;
+import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.ArrayAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.Random;
 
 public class BookingStep1Activity extends AppCompatActivity {
 
-    // Deklarasi Variabel UI
-    private TextView tvDate, tvMonthLabel, tvTime, tvPeriodLabel;
-    private LinearLayout btnSelectDate, btnSelectTime;
+    private EditText etSelectDate;
+    private Spinner spinnerTime, spinnerHospital, spinnerPoly, spinnerDoctor;
+    private TextView tvMaxKuota, tvNextQueue;
+    private Button btnLanjutkan;
 
-    // Calendar untuk menyimpan waktu yang dipilih user
     private Calendar calendar = Calendar.getInstance();
+    private final int MAX_KUOTA = 25;
+    private int nextQueue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_booking_step1);
 
-        // 1. Inisialisasi View
-        tvDate = findViewById(R.id.tvDate);
-        tvMonthLabel = findViewById(R.id.tvMonthLabel);
-        tvTime = findViewById(R.id.tvTime);
-        tvPeriodLabel = findViewById(R.id.tvPeriodLabel);
+        // Inisialisasi UI
+        etSelectDate = findViewById(R.id.etSelectDate);
+        spinnerTime = findViewById(R.id.spinnerTime);
+        spinnerHospital = findViewById(R.id.spinnerHospital);
+        spinnerPoly = findViewById(R.id.spinnerPoly);
+        spinnerDoctor = findViewById(R.id.spinnerDoctor);
+        tvMaxKuota = findViewById(R.id.tvMaxKuota);
+        tvNextQueue = findViewById(R.id.tvNextQueue);
+        btnLanjutkan = findViewById(R.id.btnLanjutkan);
 
-        btnSelectDate = findViewById(R.id.btnSelectDate);
-        btnSelectTime = findViewById(R.id.btnSelectTime);
-        Button btnLanjutkan = findViewById(R.id.btnLanjutkan);
+        // Setup Max Kuota
+        tvMaxKuota.setText("" + MAX_KUOTA);
 
-        // 2. Set Tanggal Default saat aplikasi dibuka (Hari ini)
-        updateDateLabel();
-        updateTimeLabel();
+        // Setup Next Queue (acak 4–25)
+        nextQueue = new Random().nextInt(MAX_KUOTA - 4 + 1) + 4;
+        tvNextQueue.setText("" + nextQueue);
 
-        // 3. Logika Klik Pilih TANGGAL
-        btnSelectDate.setOnClickListener(v -> {
-            // Tampilkan Popup Kalender
-            new DatePickerDialog(BookingStep1Activity.this, (view, year, month, dayOfMonth) -> {
-                // Simpan pilihan user ke variabel calendar
-                calendar.set(Calendar.YEAR, year);
-                calendar.set(Calendar.MONTH, month);
-                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+        // Setup spinnerTime (3 opsi jam)
+        String[] jamOptions = {"09:00", "13:00", "16:00"};
+        ArrayAdapter<String> timeAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_dropdown_item, jamOptions);
+        spinnerTime.setAdapter(timeAdapter);
 
-                // Update teks di layar
-                updateDateLabel();
-            },
+        // Setup spinner hospital / poly / doctor (hardcode)
+        String[] hospitals = {"RS Siloam", "RS Harapan Kita", "RS Mitra Keluarga"};
+        String[] polys = {"Cardiology", "Dermatology", "Neurology", "Pediatrics"};
+        String[] doctors = {"Dr. Andi", "Dr. Budi", "Dr. Citra", "Dr. Dedi"};
+
+        spinnerHospital.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, hospitals));
+        spinnerPoly.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, polys));
+        spinnerDoctor.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, doctors));
+
+        // Klik EditText untuk pilih Tanggal
+        etSelectDate.setOnClickListener(v -> {
+            new DatePickerDialog(BookingStep1Activity.this,
+                    (view, year, month, dayOfMonth) -> {
+                        calendar.set(Calendar.YEAR, year);
+                        calendar.set(Calendar.MONTH, month);
+                        calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                        updateDateEditText();
+                    },
                     calendar.get(Calendar.YEAR),
                     calendar.get(Calendar.MONTH),
-                    calendar.get(Calendar.DAY_OF_MONTH)).show();
+                    calendar.get(Calendar.DAY_OF_MONTH)
+            ).show();
         });
 
-        // 4. Logika Klik Pilih JAM
-        btnSelectTime.setOnClickListener(v -> {
-            // Tampilkan Popup Jam
-            new TimePickerDialog(BookingStep1Activity.this, (view, hourOfDay, minute) -> {
-                // Simpan pilihan user ke variabel calendar
-                calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                calendar.set(Calendar.MINUTE, minute);
-
-                // Update teks di layar
-                updateTimeLabel();
-            },
-                    calendar.get(Calendar.HOUR_OF_DAY),
-                    calendar.get(Calendar.MINUTE),
-                    true).show(); // true = Format 24 Jam
-        });
-
-        // 5. Tombol Lanjutkan ke Halaman 2
+        // Tombol Lanjut
         btnLanjutkan.setOnClickListener(v -> {
+            // Validasi date dulu
+            String selectedDate = etSelectDate.getText().toString().trim();
+            if (selectedDate.isEmpty()) {
+                Toast.makeText(this, "Pilih tanggal dulu", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Ambil spinner values
+            String selectedTime = spinnerTime.getSelectedItem().toString();
+            String hospital = spinnerHospital.getSelectedItem().toString();
+            String poly = spinnerPoly.getSelectedItem().toString();
+            String doctor = spinnerDoctor.getSelectedItem().toString();
+
+            // Konversi date dari EditText ke format yyyy-MM-dd
+            // Asumsikan etSelectDate format "dd MMMM yyyy", misal "09 Januari 2026"
+            SimpleDateFormat sdfInput = new SimpleDateFormat("dd MMMM yyyy", new Locale("id", "ID"));
+            SimpleDateFormat sdfOutput = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            String bookingDate = "";
+            try {
+                bookingDate = sdfOutput.format(sdfInput.parse(selectedDate));
+            } catch (Exception e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Format tanggal salah", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Gabungkan date + time
+            String bookingDateTime = bookingDate + "T" + selectedTime + ":00";
+
+            // Intent ke Step2
             Intent intent = new Intent(BookingStep1Activity.this, BookingStep2Activity.class);
+            intent.putExtra("hospital", hospital);
+            intent.putExtra("poly", poly);
+            intent.putExtra("doctor", doctor);
+            intent.putExtra("bookingDateTime", bookingDateTime);
+            intent.putExtra("nextQueue", nextQueue);
             startActivity(intent);
         });
+
     }
 
-    // Method untuk memperbarui Teks Tanggal
-    private void updateDateLabel() {
-        // Format Tanggal (Angka saja, misal: "20")
-        SimpleDateFormat dateFormat = new SimpleDateFormat("d", Locale.getDefault());
-        tvDate.setText(dateFormat.format(calendar.getTime()));
-
-        // Format Bulan (Nama bulan, misal: "Januari") - Pakai Locale Indonesia
-        Locale idLocale = new Locale("id", "ID");
-        SimpleDateFormat monthFormat = new SimpleDateFormat("MMMM", idLocale);
-        tvMonthLabel.setText(monthFormat.format(calendar.getTime()));
-    }
-
-    // Method untuk memperbarui Teks Jam dan Keterangan Waktu
-    private void updateTimeLabel() {
-        // Format Jam (Misal: "14:30")
-        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
-        tvTime.setText(timeFormat.format(calendar.getTime()));
-
-        // Logika Menentukan Pagi/Siang/Sore/Malam
-        int hour = calendar.get(Calendar.HOUR_OF_DAY);
-        String period;
-
-        if (hour >= 0 && hour < 11) {
-            period = "Pagi";
-        } else if (hour >= 11 && hour < 15) {
-            period = "Siang";
-        } else if (hour >= 15 && hour < 18) {
-            period = "Sore";
-        } else {
-            period = "Malam";
-        }
-
-        tvPeriodLabel.setText(period);
+    private void updateDateEditText() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", new Locale("id", "ID"));
+        etSelectDate.setText(dateFormat.format(calendar.getTime()));
     }
 }
