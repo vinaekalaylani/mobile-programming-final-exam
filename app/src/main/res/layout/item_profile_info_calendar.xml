@@ -30,9 +30,10 @@
             android:textSize="12sp" />
 
         <TextView
+            android:id="@+id/tv_value_birth"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="01 Januari 2000"
+            android:text="14 Juli 1986"
             android:textColor="@color/text_primary"
             android:textSize="16sp" />
     </LinearLayout>

@@ -30,9 +30,10 @@
             android:textSize="12sp" />
 
         <TextView
+            android:id="@+id/tv_value_phone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="+62 812 3456 7890"
+            android:text="+62 822-1234-5678"
             android:textColor="@color/text_primary"
             android:textSize="16sp" />
     </LinearLayout>
