@@ -7,178 +7,76 @@
     android:layout_height="match_parent"
     tools:context=".RegisterActivity">
 
-    <ScrollView
-        android:id="@+id/registerView"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:layout_editor_absoluteX="1dp"
-        tools:layout_editor_absoluteY="1dp">
-        <LinearLayout
-            android:id="@+id/registerLayout"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center_horizontal">
+
+        <TextView
+            android:text="Register"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="24sp"
+            android:textStyle="bold"/>
+
+        <EditText
+            android:id="@+id/editFullname"
+            android:hint="Fullname"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:background="@color/white">
+            android:layout_height="50dp"
+            android:layout_marginTop="24dp"
+            android:padding="12dp"
+            android:background="@drawable/bg_edittext"/>
 
-            <!-- Header -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="64dp"
-                android:background="#0F172A"
-                android:gravity="center_vertical"
-                android:paddingHorizontal="16dp">
+        <EditText
+            android:id="@+id/editEmail"
+            android:hint="Email"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="24dp"
+            android:padding="12dp"
+            android:background="@drawable/bg_edittext"/>
 
-                <ImageView
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:contentDescription="Back"/>
+        <EditText
+            android:id="@+id/editPassword"
+            android:hint="Password"
+            android:inputType="textPassword"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="16dp"
+            android:padding="12dp"
+            android:background="@drawable/bg_edittext"/>
 
-                <ImageView
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_marginStart="12dp"
-                    android:contentDescription="Logo"/>
-            </LinearLayout>
+        <EditText
+            android:id="@+id/editConfirmPassword"
+            android:hint="Confirm Password"
+            android:inputType="textPassword"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="16dp"
+            android:padding="12dp"
+            android:background="@drawable/bg_edittext"/>
 
-            <!--            android:background="@drawable/bg_card"-->
+        <Button
+            android:id="@+id/buttonRegister"
+            android:text="Register"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="24dp"
+            android:background="@drawable/bg_button"/>
 
-            <!-- Content -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/white"
-                android:orientation="vertical"
-                android:padding="20dp">
+        <TextView
+            android:id="@+id/textLogin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Already have an account? Login"
+            android:layout_marginTop="20dp"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:clickable="true"
+            android:focusable="true"/>
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Buat Akun"
-                    android:textColor="#0F172A"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Daftar untuk memulai"
-                    android:textColor="#6B7280"
-                    android:textSize="14sp" />
-
-                <!-- Card -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:orientation="vertical"
-                    android:padding="20dp">
-
-                    <EditText
-                        android:id="@+id/editEmail"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:layout_marginTop="32dp"
-                        android:background="@drawable/bg_edittext"
-                        android:hint="Enter Email"
-                        android:inputType="textEmailAddress"
-                        android:padding="12dp" />
-
-                    <EditText
-                        android:id="@+id/editPassword"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:layout_marginTop="16dp"
-                        android:background="@drawable/bg_edittext"
-                        android:hint="Enter Password"
-                        android:inputType="textPassword"
-                        android:padding="12dp" />
-
-                    <EditText
-                        android:id="@+id/editConfirmPassword"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:layout_marginTop="16dp"
-                        android:background="@drawable/bg_edittext"
-                        android:hint="Confirm Password"
-                        android:inputType="textPassword"
-                        android:padding="12dp" />
-
-                    <EditText
-                        android:id="@+id/editPhoneNo"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:layout_marginTop="16dp"
-                        android:background="@drawable/bg_edittext"
-                        android:hint="Enter Phone No"
-                        android:inputType="phone"
-                        android:padding="12dp" />
-
-                    <EditText
-                        android:id="@+id/editFullname"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:layout_marginTop="16dp"
-                        android:background="@drawable/bg_edittext"
-                        android:hint="Enter Fullname"
-                        android:padding="12dp" />
-
-                    <EditText
-                        android:id="@+id/editDob"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:layout_marginTop="16dp"
-                        android:background="@drawable/bg_edittext"
-                        android:hint="Enter Date of Birth"
-                        android:padding="12dp" />
-
-                    <EditText
-                        android:id="@+id/editGender"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:layout_marginTop="16dp"
-                        android:background="@drawable/bg_edittext"
-                        android:hint="Enter Gender"
-                        android:padding="12dp" />
-
-                    <EditText
-                        android:id="@+id/editHeight"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:layout_marginTop="16dp"
-                        android:background="@drawable/bg_edittext"
-                        android:hint="Enter Height (cm)"
-                        android:padding="12dp" />
-
-                    <EditText
-                        android:id="@+id/editWeight"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:layout_marginTop="16dp"
-                        android:background="@drawable/bg_edittext"
-                        android:hint="Enter Weight (kg)"
-                        android:padding="12dp" />
-
-                    <Button
-                        android:layout_width="wrap_content"
-                        android:layout_height="50dp"
-                        android:layout_marginTop="24dp"
-                        android:background="@drawable/bg_button"
-                        android:text="Buat Akun"
-                        android:textColor="#000000"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:gravity="center"
-                        android:text="Sudah punya akun? Login"
-                        android:textColor="#1D4ED8"
-                        android:textSize="13sp" />
-
-                </LinearLayout>
-            </LinearLayout>
-        </LinearLayout>
-    </ScrollView>
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

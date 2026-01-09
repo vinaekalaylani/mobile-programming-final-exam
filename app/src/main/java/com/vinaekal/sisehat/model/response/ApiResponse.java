@@ -1,4 +1,4 @@
-package com.vinaekal.sisehat.model;
+package com.vinaekal.sisehat.model.response;
 
 public class ApiResponse<T> {
     private String code;

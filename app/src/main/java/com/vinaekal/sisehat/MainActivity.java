@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,8 +12,11 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.vinaekal.sisehat.util.Session;
+
 public class MainActivity extends AppCompatActivity {
 
+    TextView welcomeUser;
     View imageProfile;
     Button buttonBooking, buttonHistory;
 
@@ -27,9 +31,14 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        welcomeUser = findViewById(R.id.textViewWelcome);
         imageProfile = findViewById(R.id.imageProfile);
         buttonBooking = findViewById(R.id.buttonBooking);
         buttonHistory = findViewById(R.id.buttonHistory);
+
+        Session session = new Session(this);
+        String username = session.getUsername();
+        welcomeUser.setText("Halo, " + username + "!");
 
         imageProfile.setOnClickListener(v -> {
             startActivity(new Intent(this, ProfilActivity.class));
