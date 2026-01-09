@@ -30,9 +30,10 @@
             android:textSize="12sp" />
 
         <TextView
+            android:id="@+id/tv_value_job"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Koki"
+            android:text="Fry Cook"
             android:textColor="@color/text_primary"
             android:textSize="16sp" />
     </LinearLayout>
