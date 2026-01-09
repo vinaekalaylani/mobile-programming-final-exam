@@ -13,6 +13,7 @@ import com.vinaekal.sisehat.model.request.BookingRequest;
 import com.vinaekal.sisehat.model.response.ApiResponse;
 import com.vinaekal.sisehat.network.ApiClient;
 import com.vinaekal.sisehat.network.ApiService;
+import com.vinaekal.sisehat.util.NotificationHelper;
 import com.vinaekal.sisehat.util.Session;
 
 import retrofit2.Call;
@@ -89,6 +90,9 @@ public class BookingStep2Activity extends AppCompatActivity {
                     if ("200".equals(body.getCode())) {
                         BookingContent booking = body.getContent();
 
+                        // Tampilkan Notifikasi Berhasil
+                        NotificationHelper.showSuccessNotification(BookingStep2Activity.this, booking.getQueue_number());
+
                         // Lanjut ke BookingSuccessActivity + kirim data booking
                         Intent intent = new Intent(BookingStep2Activity.this, BookingSuccessActivity.class);
                         intent.putExtra("queue_number", booking.getQueue_number());
@@ -100,16 +104,20 @@ public class BookingStep2Activity extends AppCompatActivity {
                         finish();
 
                     } else {
+                        // Tampilkan Notifikasi Gagal jika ada error dari API
+                        NotificationHelper.showFailureNotification(BookingStep2Activity.this);
                         Toast.makeText(BookingStep2Activity.this, body.getMessage(), Toast.LENGTH_SHORT).show();
                     }
 
                 } else {
+                    NotificationHelper.showFailureNotification(BookingStep2Activity.this);
                     Toast.makeText(BookingStep2Activity.this, "Server error", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<ApiResponse<BookingContent>> call, Throwable t) {
+                NotificationHelper.showFailureNotification(BookingStep2Activity.this);
                 Toast.makeText(BookingStep2Activity.this, "Gagal koneksi ke server", Toast.LENGTH_SHORT).show();
             }
         });
