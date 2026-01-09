@@ -12,6 +12,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.vinaekal.sisehat.util.NotificationHelper;
 import com.vinaekal.sisehat.util.Session;
 
 public class MainActivity extends AppCompatActivity {
@@ -31,6 +32,9 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        // Inisialisasi Channel Notifikasi
+        NotificationHelper.createNotificationChannel(this);
+
         welcomeUser = findViewById(R.id.textViewWelcome);
         imageProfile = findViewById(R.id.imageProfile);
         buttonBooking = findViewById(R.id.buttonBooking);
@@ -42,12 +46,15 @@ public class MainActivity extends AppCompatActivity {
 
         imageProfile.setOnClickListener(v -> {
             startActivity(new Intent(this, ProfilActivity.class));
-            finish();
         });
 
         buttonBooking.setOnClickListener(v -> {
             startActivity(new Intent(this, BookingStep1Activity.class));
-            finish();
+        });
+
+        buttonHistory.setOnClickListener(v -> {
+            // TODO: Implement RiwayatActivity
+            // startActivity(new Intent(this, RiwayatActivity.class));
         });
     }
 }
