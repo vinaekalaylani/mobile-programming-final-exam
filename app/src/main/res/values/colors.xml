@@ -11,8 +11,7 @@
     <color name="primary">#1A237E</color>
     <color name="primary_dark">#000051</color>
     <color name="primary_light">#534BAE</color>
-    <color name="accent">#FFC107</color>
-    <color name="secondary">#FFC107</color> <!-- FIX: Menambahkan kembali warna secondary yang hilang -->
+    <color name="secondary">#FFC107</color>
 
     <color name="text_primary">#212121</color>
     <color name="text_secondary">#757575</color>

@@ -1,4 +1,4 @@
-package com.vinaekal.sisehat.model;
+package com.vinaekal.sisehat.model.response;
 
 public class User {
     private int id;

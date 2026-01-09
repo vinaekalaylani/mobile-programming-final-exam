@@ -9,9 +9,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.vinaekal.sisehat.model.ApiRequest;
-import com.vinaekal.sisehat.model.ApiResponse;
-import com.vinaekal.sisehat.model.LoginContent;
+import com.vinaekal.sisehat.model.request.LoginRequest;
+import com.vinaekal.sisehat.model.response.ApiResponse;
+import com.vinaekal.sisehat.model.content.LoginContent;
 import com.vinaekal.sisehat.network.ApiClient;
 import com.vinaekal.sisehat.network.ApiService;
 import com.vinaekal.sisehat.util.Session;
@@ -63,7 +63,7 @@ public class LoginActivity extends AppCompatActivity {
 
         ApiService apiService = ApiClient.getClient(this).create(ApiService.class);
 
-        ApiRequest request = new ApiRequest(email, password);
+        LoginRequest request = new LoginRequest(email, password);
 
         apiService.login(request).enqueue(new Callback<ApiResponse<LoginContent>>() {
             @Override
@@ -75,6 +75,7 @@ public class LoginActivity extends AppCompatActivity {
                     if ("0".equals(body.getCode())) {
                         Session session = new Session(LoginActivity.this);
                         session.saveToken(body.getContent().getToken());
+                        session.saveUsername(body.getContent().getUser().getUsername());
 
                         Toast.makeText(LoginActivity.this, "Login berhasil", Toast.LENGTH_SHORT).show();
 
