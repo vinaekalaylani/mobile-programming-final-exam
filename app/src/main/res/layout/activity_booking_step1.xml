@@ -26,6 +26,7 @@
             android:text="Pilih waktu dan lokasi"
             android:textSize="16sp" />
 
+        <!-- Card for Form -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -39,47 +40,59 @@
                 android:orientation="vertical"
                 android:padding="20dp">
 
+                <!-- Pilih Tanggal -->
                 <EditText
-                    android:id="@+id/etFormPendaftaran"
+                    android:id="@+id/etSelectDate"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
+                    android:layout_marginTop="20dp"
+                    android:hint="Pilih Tanggal"
+                    android:focusable="false"
+                    android:clickable="true"
                     android:background="@drawable/bg_edittext"
-                    android:textColor="@color/black"
-                    android:hint="Form Pendaftaran"
-                    android:paddingStart="12dp" />
+                    android:paddingStart="12dp"
+                    android:textColor="@color/black"/>
 
-                <EditText
-                    android:id="@+id/etRumahSakit"
+                <!-- Pilih Jam (3 opsi) -->
+                <Spinner
+                    android:id="@+id/spinnerTime"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:layout_marginTop="12dp"
-                    android:background="@drawable/bg_edittext"
-                    android:textColor="@color/black"
-                    android:hint="Pilih Rumah Sakit"
-                    android:paddingStart="12dp" />
+                    android:spinnerMode="dropdown"
+                    android:background="@drawable/bg_edittext"/>
 
-                <EditText
-                    android:id="@+id/etPoliklinik"
+                <!-- Spinner Hospital -->
+                <Spinner
+                    android:id="@+id/spinnerHospital"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
-                    android:layout_marginTop="12dp"
-                    android:background="@drawable/bg_edittext"
-                    android:textColor="@color/black"
-                    android:hint="Pilih Poliklinik"
-                    android:paddingStart="12dp" />
+                    android:spinnerMode="dropdown"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_edittext"/>
 
-                <EditText
-                    android:id="@+id/etDokter"
+                <!-- Spinner Poliklinik -->
+                <Spinner
+                    android:id="@+id/spinnerPoly"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
+                    android:spinnerMode="dropdown"
                     android:layout_marginTop="12dp"
-                    android:background="@drawable/bg_edittext"
-                    android:textColor="@color/black"
-                    android:hint="Pilih Dokter"
-                    android:paddingStart="12dp" />
+                    android:background="@drawable/bg_edittext"/>
+
+                <!-- Spinner Doctor -->
+                <Spinner
+                    android:id="@+id/spinnerDoctor"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:spinnerMode="dropdown"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/bg_edittext"/>
+
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
+        <!-- Date & Time Picker -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -95,8 +108,9 @@
                 android:padding="24dp"
                 android:weightSum="2">
 
+                <!-- Date -->
                 <LinearLayout
-                    android:id="@+id/btnSelectDate"
+                    android:id="@+id/layoutMax"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -107,16 +121,15 @@
                     android:background="?attr/selectableItemBackground">
 
                     <TextView
-                        android:id="@+id/tvMonthLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Pilih Tanggal"/>
+                        android:text="Max Kuota"/>
 
                     <TextView
-                        android:id="@+id/tvDate"
+                        android:id="@+id/tvMaxKuota"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="--"
+                        android:text="25"
                         android:textColor="@color/primary"
                         android:textSize="32sp"
                         android:textStyle="bold" />
@@ -128,8 +141,9 @@
                     android:background="#D1D5DB"
                     android:layout_marginHorizontal="10dp"/>
 
+                <!-- Time -->
                 <LinearLayout
-                    android:id="@+id/btnSelectTime"
+                    android:id="@+id/layoutNextQueue"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -140,13 +154,12 @@
                     android:background="?attr/selectableItemBackground">
 
                     <TextView
-                        android:id="@+id/tvPeriodLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Pilih Jam"/>
+                        android:text="Next Queue"/>
 
                     <TextView
-                        android:id="@+id/tvTime"
+                        android:id="@+id/tvNextQueue"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="--"
@@ -156,6 +169,41 @@
                 </LinearLayout>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
+
+        <!-- Card: Max Kuota & Next Queue -->
+<!--        <androidx.cardview.widget.CardView-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginTop="20dp"-->
+<!--            app:cardCornerRadius="12dp"-->
+<!--            app:cardElevation="2dp">-->
+
+<!--            <LinearLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:orientation="vertical"-->
+<!--                android:padding="16dp">-->
+
+<!--                <TextView-->
+<!--                    android:id="@+id/tvMaxKuota"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:text="Kuota Maks: 25"-->
+<!--                    android:textColor="@color/black"-->
+<!--                    android:textSize="16sp"-->
+<!--                    android:textStyle="bold"/>-->
+
+<!--                <TextView-->
+<!--                    android:id="@+id/tvNextQueue"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_marginTop="8dp"-->
+<!--                    android:text="Next Queue: &#45;&#45;"-->
+<!--                    android:textColor="@color/primary"-->
+<!--                    android:textSize="16sp"-->
+<!--                    android:textStyle="bold"/>-->
+<!--            </LinearLayout>-->
+<!--        </androidx.cardview.widget.CardView>-->
 
         <Button
             android:id="@+id/btnLanjutkan"
