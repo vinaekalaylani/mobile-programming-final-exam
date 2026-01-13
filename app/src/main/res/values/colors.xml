@@ -1,35 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-
+    <!-- Warna Utama Aplikasi -->
     <color name="primary">#1A237E</color>
-    <color name="primary_dark">#000051</color>
-    <color name="primary_light">#534BAE</color>
+    <color name="primary_dark">#0D47A1</color>
+    <color name="accent">#FFC107</color>
     <color name="secondary">#FFC107</color>
 
-    <color name="text_primary">#212121</color>
-    <color name="text_secondary">#757575</color>
-
-    <!-- ### WARNA UNTUK ICON BACKGROUND ### -->
-    <color name="bg_icon_color_email">#FFC107</color>
-    <color name="bg_icon_color_phone">#0D47A1</color>
-    <color name="bg_icon_color_birth">#2979FF</color>
-    <color name="bg_icon_color_address">#00C853</color>
-    <color name="bg_icon_color_job">#8E24AA</color>
-
-    <color name="logout_button_stroke">#D32F2F</color>
-    <color name="item_stroke_color">#E0E0E0</color>
-
-    <!-- New color tokens -->
+    <!-- Warna UI Dasar -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
     <color name="clr_background">#F5F5F5</color>
     <color name="clr_appbar_primary">#1A237E</color>
-    <color name="clr_btn_edit_bg">#FFC107</color>
+
+    <!-- Warna Teks (Termasuk Alias untuk Kompatibilitas) -->
+    <color name="text_primary">#212121</color>
     <color name="clr_text_primary">#212121</color>
-    <color name="clr_btn_logout_stroke">#D32F2F</color>
+    <color name="text_secondary">#757575</color>
+    <color name="clr_text_secondary">#757575</color>
+
+    <!-- Warna Khusus Elemen -->
+    <color name="clr_btn_edit_bg">#FFC107</color>
+    <color name="logout_button_stroke">#F44336</color>
+    <color name="clr_btn_logout_stroke">#F44336</color>
+
+    <!-- Warna Latar Belakang Ikon (Wajib Ada) -->
+    <color name="bg_icon_color_address">#E3F2FD</color> <!-- Biru Muda -->
+    <color name="bg_icon_color_birth">#E8F5E9</color>   <!-- Hijau Muda -->
+    <color name="bg_icon_color_email">#FFF3E0</color>   <!-- Oranye Muda -->
+    <color name="bg_icon_color_job">#F3E5F5</color>     <!-- Ungu Muda -->
+    <color name="bg_icon_color_phone">#FCE4EC</color>   <!-- Pink Muda -->
 </resources>

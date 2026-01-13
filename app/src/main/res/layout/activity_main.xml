@@ -35,7 +35,7 @@
             </androidx.cardview.widget.CardView>
 
             <ImageView
-                android:id="@+id/imageProfile"
+                android:id="@+id/profile_icon"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_gravity="end"
@@ -133,7 +133,9 @@
                         android:padding="4dp"
                         android:text="Aktif"
                         android:textColor="@android:color/black"
+                        android:textStyle="bold"
                         app:drawableStartCompat="@drawable/ic_calendar"
+                        app:drawableTint="@color/primary"
                         app:layout_constraintStart_toEndOf="@+id/view"
                         app:layout_constraintTop_toTopOf="parent" />
 
@@ -216,7 +218,7 @@
             </androidx.cardview.widget.CardView>
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonBooking"
+                android:id="@+id/button"
                 style="?attr/materialButtonOutlinedStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -232,7 +234,7 @@
                 app:strokeColor="@android:color/darker_gray" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonHistory"
+                android:id="@+id/button2"
                 style="?attr/materialButtonOutlinedStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -244,7 +246,7 @@
                 app:backgroundTint="@android:color/white"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/buttonBooking"
+                app:layout_constraintTop_toBottomOf="@+id/button"
                 app:strokeColor="@android:color/darker_gray" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
