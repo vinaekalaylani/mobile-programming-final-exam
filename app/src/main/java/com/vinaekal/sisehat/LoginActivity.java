@@ -7,7 +7,11 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.biometric.BiometricManager;
+import androidx.biometric.BiometricPrompt;
+import androidx.core.content.ContextCompat;
 
 import com.vinaekal.sisehat.model.request.LoginRequest;
 import com.vinaekal.sisehat.model.response.ApiResponse;
@@ -16,6 +20,8 @@ import com.vinaekal.sisehat.network.ApiClient;
 import com.vinaekal.sisehat.network.ApiService;
 import com.vinaekal.sisehat.util.Session;
 
+import java.util.concurrent.Executor;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -23,7 +29,7 @@ import retrofit2.Response;
 public class LoginActivity extends AppCompatActivity {
 
     EditText editEmail, editPassword;
-    Button buttonLogin;
+    Button buttonLogin, buttonBiometric;
     TextView textSubDescription;
 
     @Override
@@ -42,6 +48,7 @@ public class LoginActivity extends AppCompatActivity {
         editEmail = findViewById(R.id.editEmail);
         editPassword = findViewById(R.id.editPassword);
         buttonLogin = findViewById(R.id.buttonLogin);
+        buttonBiometric = findViewById(R.id.buttonBiometric);
         textSubDescription = findViewById(R.id.textSubDescription);
 
         buttonLogin.setOnClickListener(v -> login());
@@ -50,6 +57,59 @@ public class LoginActivity extends AppCompatActivity {
             startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
             finish();
         });
+
+        setupBiometric();
+    }
+
+    private void setupBiometric() {
+        BiometricManager biometricManager = BiometricManager.from(this);
+        int authenticators = BiometricManager.Authenticators.BIOMETRIC_STRONG | BiometricManager.Authenticators.DEVICE_CREDENTIAL;
+
+        switch (biometricManager.canAuthenticate(authenticators)) {
+            case BiometricManager.BIOMETRIC_SUCCESS:
+                buttonBiometric.setVisibility(Button.VISIBLE);
+                break;
+            default:
+                buttonBiometric.setVisibility(Button.GONE);
+                break;
+        }
+
+        Executor executor = ContextCompat.getMainExecutor(this);
+        BiometricPrompt biometricPrompt = new BiometricPrompt(LoginActivity.this,
+                executor, new BiometricPrompt.AuthenticationCallback() {
+            @Override
+            public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
+                super.onAuthenticationSucceeded(result);
+                Session session = new Session(LoginActivity.this);
+                if (session.getUsername() != null && !session.getUsername().isEmpty()) {
+                    Toast.makeText(LoginActivity.this, "Login Berhasil", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                    finish();
+                } else {
+                    Toast.makeText(LoginActivity.this, "Silakan login manual terlebih dahulu sekali", Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
+                super.onAuthenticationError(errorCode, errString);
+                Toast.makeText(getApplicationContext(), "Otentikasi error: " + errString, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onAuthenticationFailed() {
+                super.onAuthenticationFailed();
+                Toast.makeText(getApplicationContext(), "Otentikasi gagal", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
+                .setTitle("Login Si Sehat")
+                .setSubtitle("Gunakan sidik jari, wajah, atau PIN/Pola Anda")
+                .setAllowedAuthenticators(authenticators)
+                .build();
+
+        buttonBiometric.setOnClickListener(v -> biometricPrompt.authenticate(promptInfo));
     }
 
     private void login() {
