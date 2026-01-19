@@ -83,7 +83,7 @@ public class ProfilActivity extends AppCompatActivity {
     }
 
     private void logout() {
-        session.clear();
+        session.logout();
         Intent intent = new Intent(this, LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);

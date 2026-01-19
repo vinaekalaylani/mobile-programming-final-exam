@@ -16,13 +16,11 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.vinaekal.sisehat.util.Session;
-
 public class SplashActivity extends AppCompatActivity {
 
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-                proceedToNextStep();
+                proceedToLogin();
             });
 
     @Override
@@ -41,7 +39,7 @@ public class SplashActivity extends AppCompatActivity {
             public void run() {
                 askNotificationPermission();
             }
-        }, 3000);
+        }, 2000);
     }
 
     private void askNotificationPermission() {
@@ -49,38 +47,16 @@ public class SplashActivity extends AppCompatActivity {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
             } else {
-                proceedToNextStep();
+                proceedToLogin();
             }
         } else {
-            proceedToNextStep();
+            proceedToLogin();
         }
     }
 
-    private void proceedToNextStep() {
-        Session session = new Session(this);
-        if (!session.isLoggedIn()) {
-            startActivity(new Intent(SplashActivity.this, LoginActivity.class));
-            finish();
-            return;
-        }
-
-        String lastPage = session.getLastPage();
-        Intent intent;
-
-        if (lastPage != null) {
-            try {
-                // Mencoba memuat Activity terakhir yang disimpan
-                Class<?> activityClass = Class.forName(lastPage);
-                intent = new Intent(SplashActivity.this, activityClass);
-            } catch (ClassNotFoundException e) {
-                // Jika class tidak ditemukan, kembali ke MainActivity
-                intent = new Intent(SplashActivity.this, MainActivity.class);
-            }
-        } else {
-            intent = new Intent(SplashActivity.this, MainActivity.class);
-        }
-
-        startActivity(intent);
+    private void proceedToLogin() {
+        // Selalu lewat LoginActivity untuk verifikasi (Biometrik atau Manual)
+        startActivity(new Intent(SplashActivity.this, LoginActivity.class));
         finish();
     }
 }

@@ -8,17 +8,13 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.vinaekal.sisehat.model.content.BookingContent;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.vinaekal.sisehat.model.request.BookingRequest;
-import com.vinaekal.sisehat.model.response.ApiResponse;
-import com.vinaekal.sisehat.network.ApiClient;
-import com.vinaekal.sisehat.network.ApiService;
 import com.vinaekal.sisehat.util.NotificationHelper;
 import com.vinaekal.sisehat.util.Session;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import java.util.HashMap;
+import java.util.Map;
 
 public class BookingStep2Activity extends AppCompatActivity {
 
@@ -49,7 +45,7 @@ public class BookingStep2Activity extends AppCompatActivity {
         // Ambil session
         session = new Session(this);
         String username = session.getUsername();
-        int userId = session.getUserId(); // Pastikan session simpan userId
+        int userId = session.getUserId();
 
         // Set peserta
         etPeserta.setText(username);
@@ -63,63 +59,43 @@ public class BookingStep2Activity extends AppCompatActivity {
                 return;
             }
 
-            // Build request
-            BookingRequest request = new BookingRequest(
-                    userId,
-                    hospital,
-                    poly,
-                    doctor,
-                    "A" + nextQueue,
-                    bookingDateTime,
-                    catatan,
-                    "Aktif"
-            );
+            // Build data map for Firestore
+            Map<String, Object> bookingData = new HashMap<>();
+            bookingData.put("userId", userId);
+            bookingData.put("hospital", hospital);
+            bookingData.put("poly", poly);
+            bookingData.put("doctor", doctor);
+            bookingData.put("queue_number", "A" + nextQueue);
+            bookingData.put("booking_date", bookingDateTime);
+            bookingData.put("notes", catatan);
+            bookingData.put("status", "Aktif");
 
-            sendBooking(request);
+            sendBooking(bookingData, "A" + nextQueue);
         });
     }
 
-    private void sendBooking(BookingRequest request) {
-        ApiService apiService = ApiClient.getClient(this).create(ApiService.class);
-        apiService.createBooking(request).enqueue(new Callback<ApiResponse<BookingContent>>() {
-            @Override
-            public void onResponse(Call<ApiResponse<BookingContent>> call, Response<ApiResponse<BookingContent>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<BookingContent> body = response.body();
+    private void sendBooking(Map<String, Object> bookingData, String queueNum) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-                    if ("200".equals(body.getCode())) {
-                        BookingContent booking = body.getContent();
+        db.collection("bookings")
+                .add(bookingData)
+                .addOnSuccessListener(documentReference -> {
+                    // Tampilkan Notifikasi Berhasil
+                    NotificationHelper.showSuccessNotification(BookingStep2Activity.this, queueNum);
 
-                        // Tampilkan Notifikasi Berhasil
-                        NotificationHelper.showSuccessNotification(BookingStep2Activity.this, booking.getQueue_number());
-
-                        // Lanjut ke BookingSuccessActivity + kirim data booking
-                        Intent intent = new Intent(BookingStep2Activity.this, BookingSuccessActivity.class);
-                        intent.putExtra("queue_number", booking.getQueue_number());
-                        intent.putExtra("hospital", booking.getHospital());
-                        intent.putExtra("doctor", booking.getDoctor());
-                        intent.putExtra("department", booking.getDepartment());
-                        intent.putExtra("booking_date", booking.getBooking_date());
-                        startActivity(intent);
-                        finish();
-
-                    } else {
-                        // Tampilkan Notifikasi Gagal jika ada error dari API
-                        NotificationHelper.showFailureNotification(BookingStep2Activity.this);
-                        Toast.makeText(BookingStep2Activity.this, body.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-
-                } else {
+                    // Lanjut ke BookingSuccessActivity
+                    Intent intent = new Intent(BookingStep2Activity.this, BookingSuccessActivity.class);
+                    intent.putExtra("queue_number", queueNum);
+                    intent.putExtra("hospital", hospital);
+                    intent.putExtra("doctor", doctor);
+                    intent.putExtra("department", poly);
+                    intent.putExtra("booking_date", bookingDateTime);
+                    startActivity(intent);
+                    finish();
+                })
+                .addOnFailureListener(e -> {
                     NotificationHelper.showFailureNotification(BookingStep2Activity.this);
-                    Toast.makeText(BookingStep2Activity.this, "Server error", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ApiResponse<BookingContent>> call, Throwable t) {
-                NotificationHelper.showFailureNotification(BookingStep2Activity.this);
-                Toast.makeText(BookingStep2Activity.this, "Gagal koneksi ke server", Toast.LENGTH_SHORT).show();
-            }
-        });
+                    Toast.makeText(BookingStep2Activity.this, "Gagal booking: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 }

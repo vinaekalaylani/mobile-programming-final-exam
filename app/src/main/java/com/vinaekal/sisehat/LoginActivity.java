@@ -2,6 +2,7 @@ package com.vinaekal.sisehat;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -22,10 +23,11 @@ import java.util.concurrent.Executor;
 
 public class LoginActivity extends AppCompatActivity {
 
-    EditText editEmail, editPassword;
-    Button buttonLogin, buttonBiometric;
-    TextView textSubDescription;
+    private EditText editEmail, editPassword;
+    private Button buttonLogin, buttonBiometric;
+    private TextView textSubDescription;
     private FirebaseAuth mAuth;
+    private Session session;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,9 +35,9 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         mAuth = FirebaseAuth.getInstance();
+        session = new Session(this);
 
-        // 🔹 Auto-login jika session masih ada
-        Session session = new Session(this);
+        // Auto-login jika token benar-benar masih ada (tidak di-kill)
         if (session.isLoggedIn()) {
             startActivity(new Intent(this, MainActivity.class));
             finish();
@@ -56,6 +58,11 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         setupBiometric();
+
+        // 🔹 LOGIC: Jika aplikasi di-kill, token hilang tapi canUseBiometric masih TRUE
+        if (!session.isLoggedIn() && session.canUseBiometric()) {
+            triggerBiometricPrompt();
+        }
     }
 
     private void setupBiometric() {
@@ -64,27 +71,27 @@ public class LoginActivity extends AppCompatActivity {
 
         switch (biometricManager.canAuthenticate(authenticators)) {
             case BiometricManager.BIOMETRIC_SUCCESS:
-                buttonBiometric.setVisibility(Button.VISIBLE);
+                buttonBiometric.setVisibility(View.VISIBLE);
                 break;
             default:
-                buttonBiometric.setVisibility(Button.GONE);
+                buttonBiometric.setVisibility(View.GONE);
                 break;
         }
 
+        buttonBiometric.setOnClickListener(v -> triggerBiometricPrompt());
+    }
+
+    private void triggerBiometricPrompt() {
         Executor executor = ContextCompat.getMainExecutor(this);
         BiometricPrompt biometricPrompt = new BiometricPrompt(LoginActivity.this,
                 executor, new BiometricPrompt.AuthenticationCallback() {
             @Override
             public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
                 super.onAuthenticationSucceeded(result);
-                Session session = new Session(LoginActivity.this);
-                if (session.getToken() != null) {
-                    Toast.makeText(LoginActivity.this, "Login Berhasil (Biometrik)", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
-                    finish();
-                } else {
-                    Toast.makeText(LoginActivity.this, "Silakan login manual terlebih dahulu untuk pertama kali", Toast.LENGTH_LONG).show();
-                }
+                // Biometrik berhasil -> paksa masuk karena user sudah terverifikasi secara hardware
+                Toast.makeText(LoginActivity.this, "Otentikasi Berhasil", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                finish();
             }
 
             @Override
@@ -95,17 +102,16 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onAuthenticationFailed() {
                 super.onAuthenticationFailed();
-                Toast.makeText(getApplicationContext(), "Otentikasi gagal", Toast.LENGTH_SHORT).show();
             }
         });
 
         BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
-                .setTitle("Login Si Sehat")
-                .setSubtitle("Gunakan sidik jari, wajah, atau PIN Anda")
-                .setAllowedAuthenticators(authenticators)
+                .setTitle("Otentikasi Si Sehat")
+                .setSubtitle("Gunakan Sidik Jari/Wajah/PIN")
+                .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG | BiometricManager.Authenticators.DEVICE_CREDENTIAL)
                 .build();
 
-        buttonBiometric.setOnClickListener(v -> biometricPrompt.authenticate(promptInfo));
+        biometricPrompt.authenticate(promptInfo);
     }
 
     private void login() {
@@ -122,16 +128,12 @@ public class LoginActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         FirebaseUser user = mAuth.getCurrentUser();
                         if (user != null) {
-                            Session session = new Session(LoginActivity.this);
-                            session.saveToken(user.getUid()); // Gunakan UID sebagai token
+                            session.saveToken(user.getUid());
                             session.saveUsername(user.getDisplayName() != null ? user.getDisplayName() : "User");
                             session.saveProfile(user.getEmail(), "", "", "", "");
+                            session.setCanUseBiometric(true); // Aktifkan biometrik setelah login manual sukses
 
-                            Toast.makeText(LoginActivity.this, "Login berhasil", Toast.LENGTH_SHORT).show();
-
-                            // Jalankan Service untuk deteksi kill task
                             startService(new Intent(LoginActivity.this, SessionService.class));
-
                             startActivity(new Intent(LoginActivity.this, MainActivity.class));
                             finish();
                         }
@@ -139,14 +141,5 @@ public class LoginActivity extends AppCompatActivity {
                         Toast.makeText(LoginActivity.this, "Login gagal: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                     }
                 });
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Session session = new Session(this);
-        if (session.isLoggedIn()) {
-            session.saveLastPage(getClass().getName());
-        }
     }
 }

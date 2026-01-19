@@ -22,7 +22,7 @@ public class SessionService extends Service {
     public void onTaskRemoved(Intent rootIntent) {
         // Method ini dipanggil saat aplikasi di-swipe dari recent apps (Kill Task)
         Session session = new Session(this);
-        session.clear(); // Hapus session login
+        session.clearSessionOnly(); // Hanya hapus token, biometrik tetap aktif
         stopSelf();
     }
 }

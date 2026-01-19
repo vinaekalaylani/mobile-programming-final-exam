@@ -17,115 +17,81 @@ Sistem login ganda yang menggabungkan keamanan Cloud Google dengan kenyamanan te
 - **Device Credential Fallback:** Jika biometrik tidak tersedia atau gagal, sistem secara otomatis memberikan opsi login menggunakan PIN/Pola HP.
 
 ```java
-// Implementasi Biometric di LoginActivity.java
+// Logic Login Biometrik di LoginActivity.java
 private void setupBiometric() {
-    BiometricManager biometricManager = BiometricManager.from(this);
-    // Mendukung Fingerprint, Face, dan Device PIN
     int authenticators = BiometricManager.Authenticators.BIOMETRIC_STRONG | BiometricManager.Authenticators.DEVICE_CREDENTIAL;
-
-    switch (biometricManager.canAuthenticate(authenticators)) {
-        case BiometricManager.BIOMETRIC_SUCCESS:
-            buttonBiometric.setVisibility(View.VISIBLE);
-            break;
-        default:
-            buttonBiometric.setVisibility(View.GONE);
-            break;
-    }
-
     BiometricPrompt biometricPrompt = new BiometricPrompt(this, executor, new BiometricPrompt.AuthenticationCallback() {
         @Override
         public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
-            super.onAuthenticationSucceeded(result);
-            // Verifikasi Session Token sebelum masuk ke Dashboard
-            if (session.getToken() != null) {
+            // Login Berhasil jika Token Session tersedia
+            if (session.isLoggedIn()) {
                 startActivity(new Intent(LoginActivity.this, MainActivity.class));
             }
         }
     });
-
-    BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Login Si Sehat")
-            .setSubtitle("Gunakan sidik jari, wajah, atau PIN Anda")
-            .setAllowedAuthenticators(authenticators)
-            .build();
 }
 ```
 
-### 2. Keamanan Sesi Cerdas (Anti-Leak System)
+### 2. Cloud Data Synchronization (Firestore)
+Aplikasi ini sudah sepenuhnya menggunakan **Firebase Firestore** untuk penyimpanan data yang stabil dan real-time.
+*   **Real-time Booking:** Data reservasi disimpan langsung ke koleksi `bookings` di Cloud Firestore.
+*   **Profile Sync:** Data diri pasien (alamat, telepon, pekerjaan) disinkronkan ke koleksi `users` berdasarkan `UID` unik.
+
+```java
+// Simpan Profil ke Firestore di EditProfilActivity.java
+private void saveProfileToCloud() {
+    FirebaseUser user = mAuth.getCurrentUser();
+    if (user != null) {
+        db.collection("users").document(user.getUid())
+                .set(profileData)
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, "Profil Sinkron ke Cloud", Toast.LENGTH_SHORT).show();
+                });
+    }
+}
+```
+
+### 3. Keamanan Sesi Cerdas (Anti-Leak System)
 Melindungi privasi data pasien dengan memastikan sesi berakhir saat aplikasi benar-benar ditutup.
-*   **Auto-Logout on Task Kill:** Menghapus data login saat aplikasi di-swipe dari recent apps menggunakan Service.
-*   **Kill Task (Double Back to Exit):** Mencegah penutupan aplikasi yang tidak disengaja.
+*   **Auto-Logout on Task Kill:** Menghapus data login saat aplikasi di-swipe dari recent apps menggunakan `SessionService`.
+*   **Auto-Biometric Prompt:** Jika aplikasi hanya diminimize, saat dibuka kembali user akan diminta sidik jari secara otomatis sebelum masuk ke Dashboard.
 
-```java
-// Implementasi Kill Task di MainActivity.java
-getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
-    @Override
-    public void handleOnBackPressed() {
-        if (backPressedTime + 2000 > System.currentTimeMillis()) {
-            finishAffinity(); // Tutup semua activity
-            System.exit(0);   // Hentikan proses total
-        } else {
-            Toast.makeText(MainActivity.this, "Tekan sekali lagi untuk keluar", Toast.LENGTH_SHORT).show();
-        }
-        backPressedTime = System.currentTimeMillis();
-    }
-});
-```
-
-### 3. Notifikasi Premium & Cloud Messaging (FCM)
-Pemberitahuan real-time yang interaktif langsung dari cloud.
+### 4. Notifikasi Premium & Cloud Messaging (FCM)
+Pemberitahuan real-time yang interaktif langsung dari cloud Google.
 *   **Interactive Actions:** Tombol "Bagikan" (Share) dan "Lihat Janji" langsung di notifikasi.
-*   **Heads-up Notification:** Menggunakan High Priority Channel agar muncul di atas layar sebagai pop-up.
+*   **FCM Service:** Menangani pesan masuk di latar belakang melalui `MyFirebaseMessagingService`.
 
-```java
-// Logic Notifikasi Premium di NotificationHelper.java
-public static void showSuccessNotification(Context context, String queueNumber) {
-    NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_calendar)
-            .setContentTitle("Booking Berhasil! No Antrian: " + queueNumber)
-            .setStyle(new NotificationCompat.BigTextStyle().bigText("Pendaftaran Anda telah berhasil dikonfirmasi..."))
-            .addAction(R.drawable.ic_share, "Bagikan", sharePendingIntent)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setAutoCancel(true);
-}
-```
-
-### 4. Persistence & Last Page Save
+### 5. Persistence & Last Page Save
 Aplikasi mengingat posisi terakhir pengguna sebelum aplikasi ditutup (selama tidak di-kill).
-*   **Logic:** Menyimpan nama class activity terakhir ke SharedPreferences dan memuatnya kembali saat SplashActivity.
-
-```java
-// SplashActivity Logic untuk Persistence
-String lastPage = session.getLastPage();
-if (lastPage != null) {
-    try {
-        Class<?> activityClass = Class.forName(lastPage);
-        startActivity(new Intent(this, activityClass));
-    } catch (ClassNotFoundException e) {
-        startActivity(new Intent(this, MainActivity.class));
-    }
-}
-```
-
-### 5. Profil & Interaksi Tactile
-Manajemen data diri dengan pengalaman pengguna yang responsif.
-*   **Click Animation:** Memberikan efek visual (Scale Animation 0.97f) saat tombol ditekan untuk feedback tactile.
-*   **Real-time Profile Update:** Alamat, No. HP, dan Pekerjaan tersimpan secara permanen di memori lokal.
+*   **Logic:** Menyimpan nama class activity terakhir ke SharedPreferences dan memuatnya kembali saat SplashActivity dijalankan.
 
 ---
 
 ## 🛠️ Stack Teknologi
-*   **Backend & Auth:** Google Firebase (Auth & Cloud Messaging)
-*   **API Client:** Retrofit 2 & OkHttp 3 (Logging Interceptor)
+*   **Database & Auth:** Google Firebase (Authentication, Cloud Firestore, Cloud Messaging)
+*   **Networking:** Retrofit 2 & OkHttp 3 (Digunakan untuk legacy API integration)
 *   **Local Storage:** SharedPreferences (Session Manager)
 *   **Security:** AndroidX Biometric Library (Fingerprint & Face)
 *   **UI Components:** Material Design 3 (CardView, CoordinatorLayout, Custom Vectors)
 
 ---
 
-## 📄 Struktur Proyek
-*   `com.vinaekal.sisehat.network`: Menangani komunikasi Firebase & API Service.
-*   `com.vinaekal.sisehat.util`: Berisi `NotificationHelper`, `Session Manager`, dan `SessionService` (Task Killer).
-*   `com.vinaekal.sisehat.model`: Data class untuk request dan response booking/auth.
+## ⚙️ Konfigurasi Firebase (Penting)
+Untuk menghindari kegagalan sinkronisasi data ("Server Error" atau "Gagal Sinkron"), pastikan pengaturan **Firestore Rules** di Firebase Console sudah diset sebagai berikut:
+
+```javascript
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+```
 
 ---
+
+## 📄 Struktur Proyek
+*   `com.vinaekal.sisehat.network`: Implementasi `MyFirebaseMessagingService` dan `ApiClient`.
+*   `com.vinaekal.sisehat.util`: Berisi `NotificationHelper`, `Session`, dan `SessionService` (Task Killer).
+*   `com.vinaekal.sisehat.model`: Data class untuk request dan response.
