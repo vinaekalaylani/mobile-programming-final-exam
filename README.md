@@ -1,128 +1,131 @@
-# mobile-programming-final-exam
-Mobile Programming - Final Exam
+# Si Sehat - Solusi Reservasi Layanan Kesehatan Modern
 
-## Implementasi Notifikasi Premium
-
-Fitur notifikasi di aplikasi ini telah dirancang untuk memberikan pengalaman pengguna yang modern, informatif, dan interaktif. Implementasi ini mencakup permintaan izin sesuai standar terbaru, saluran notifikasi berprioritas tinggi, dan fungsionalitas premium seperti tombol aksi, bunyi, dan getar.
-
-### Alur Kerja Notifikasi
-
-1.  **Permintaan Izin**: Saat aplikasi pertama kali dijalankan, `SplashActivity` akan mendeteksi versi Android pengguna. Jika perangkat menjalankan Android 13 (Tiramisu) atau lebih baru, aplikasi akan menampilkan dialog sistem untuk meminta izin `POST_NOTIFICATIONS`.
-2.  **Pembuatan Saluran Notifikasi**: Saat `MainActivity` pertama kali dibuat, aplikasi akan membuat "Saluran Notifikasi" (Notification Channel) dengan tingkat kepentingan `HIGH`. Ini adalah langkah wajib untuk memastikan notifikasi dapat muncul sebagai *pop-up* di atas layar, lengkap dengan bunyi dan getar.
-3.  **Pemicu Notifikasi**: Notifikasi akan dikirim saat pengguna berhasil mengonfirmasi *booking* di halaman `BookingStep2Activity`.
+Aplikasi **Si Sehat** adalah solusi mobile inovatif yang dirancang untuk memudahkan pasien dalam melakukan reservasi (booking) janji temu dokter secara online. Dengan fokus pada keamanan data dan kemudahan akses, aplikasi ini mengintegrasikan fitur-fitur modern berstandar industri.
 
 ---
 
-### Penjelasan Kode & Implementasi
+## 🚀 Fitur Utama & Implementasi Kode
 
-#### 1. Meminta Izin Notifikasi (`SplashActivity.java`)
+### 1. Autentikasi Hybrid (Firebase & Biometric)
+Sistem login ganda yang menggabungkan keamanan Cloud Google dengan kenyamanan teknologi hardware perangkat.
+*   **Firebase Auth:** Mengamankan kredensial pengguna di server Google.
+*   **Jetpack Biometric:** Mendukung **Sidik Jari (Fingerprint)**, **Pengenalan Wajah (Face Unlock)**, serta **PIN/Pola Perangkat**.
 
-Untuk mematuhi aturan privasi Android 13+, kita harus meminta izin secara eksplisit. Ini dilakukan di `SplashActivity` untuk memastikan izin sudah didapatkan di awal.
+#### Detail Fitur Biometrik:
+- **Capability Check:** Aplikasi mendeteksi ketersediaan hardware biometrik secara otomatis.
+- **Strong Authenticator:** Menggunakan tingkat keamanan `BIOMETRIC_STRONG` sesuai standar Android terbaru.
+- **Device Credential Fallback:** Jika biometrik tidak tersedia atau gagal, sistem secara otomatis memberikan opsi login menggunakan PIN/Pola HP.
 
 ```java
-// Di dalam SplashActivity.java
+// Implementasi Biometric di LoginActivity.java
+private void setupBiometric() {
+    BiometricManager biometricManager = BiometricManager.from(this);
+    // Mendukung Fingerprint, Face, dan Device PIN
+    int authenticators = BiometricManager.Authenticators.BIOMETRIC_STRONG | BiometricManager.Authenticators.DEVICE_CREDENTIAL;
 
-private final ActivityResultLauncher<String> requestPermissionLauncher =
-        registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-            // Lanjutkan ke login setelah user merespons
-            proceedToLogin();
-        });
+    switch (biometricManager.canAuthenticate(authenticators)) {
+        case BiometricManager.BIOMETRIC_SUCCESS:
+            buttonBiometric.setVisibility(View.VISIBLE);
+            break;
+        default:
+            buttonBiometric.setVisibility(View.GONE);
+            break;
+    }
 
-private void askNotificationPermission() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        // Jika izin belum diberikan, tampilkan dialog permintaan
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
-        } else {
-            proceedToLogin(); // Izin sudah ada, lanjutkan
+    BiometricPrompt biometricPrompt = new BiometricPrompt(this, executor, new BiometricPrompt.AuthenticationCallback() {
+        @Override
+        public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
+            super.onAuthenticationSucceeded(result);
+            // Verifikasi Session Token sebelum masuk ke Dashboard
+            if (session.getToken() != null) {
+                startActivity(new Intent(LoginActivity.this, MainActivity.class));
+            }
         }
-    } else {
-        proceedToLogin(); // Versi Android lama, tidak perlu izin
-    }
+    });
+
+    BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
+            .setTitle("Login Si Sehat")
+            .setSubtitle("Gunakan sidik jari, wajah, atau PIN Anda")
+            .setAllowedAuthenticators(authenticators)
+            .build();
 }
 ```
 
-**Penjelasan:**
-*   `ActivityResultLauncher` digunakan untuk menangani hasil dari dialog permintaan izin.
-*   Logika ini hanya berjalan di Android 13 ke atas, memastikan kompatibilitas dengan versi lama.
-
-#### 2. Membuat Saluran Notifikasi (`MainActivity.java`)
-
-Sebelum notifikasi bisa dikirim, salurannya harus dibuat. Ini dilakukan sekali saja saat `MainActivity` dibuka.
+### 2. Keamanan Sesi Cerdas (Anti-Leak System)
+Melindungi privasi data pasien dengan memastikan sesi berakhir saat aplikasi benar-benar ditutup.
+*   **Auto-Logout on Task Kill:** Menghapus data login saat aplikasi di-swipe dari recent apps menggunakan Service.
+*   **Kill Task (Double Back to Exit):** Mencegah penutupan aplikasi yang tidak disengaja.
 
 ```java
-// Di dalam onCreate() di MainActivity.java
-
-NotificationHelper.createNotificationChannel(this);
+// Implementasi Kill Task di MainActivity.java
+getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+    @Override
+    public void handleOnBackPressed() {
+        if (backPressedTime + 2000 > System.currentTimeMillis()) {
+            finishAffinity(); // Tutup semua activity
+            System.exit(0);   // Hentikan proses total
+        } else {
+            Toast.makeText(MainActivity.this, "Tekan sekali lagi untuk keluar", Toast.LENGTH_SHORT).show();
+        }
+        backPressedTime = System.currentTimeMillis();
+    }
+});
 ```
 
-Kode di atas memanggil metode dari kelas utilitas kita, `NotificationHelper`, untuk mendaftarkan saluran ke sistem.
-
-#### 3. Logika Notifikasi Premium (`NotificationHelper.java`)
-
-Ini adalah inti dari fungsionalitas notifikasi kita. Kelas ini menangani semua detail untuk membuat notifikasi yang canggih.
+### 3. Notifikasi Premium & Cloud Messaging (FCM)
+Pemberitahuan real-time yang interaktif langsung dari cloud.
+*   **Interactive Actions:** Tombol "Bagikan" (Share) dan "Lihat Janji" langsung di notifikasi.
+*   **Heads-up Notification:** Menggunakan High Priority Channel agar muncul di atas layar sebagai pop-up.
 
 ```java
-// Di dalam NotificationHelper.java
-
-public static void createNotificationChannel(Context context) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        // 1. Buat Channel dengan Prioritas TINGGI
-        NotificationChannel channel = new NotificationChannel(
-            CHANNEL_ID, 
-            CHANNEL_NAME, 
-            NotificationManager.IMPORTANCE_HIGH // Penting untuk pop-up
-        );
-        
-        // 2. Aktifkan Bunyi & Getar
-        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        channel.setSound(defaultSoundUri, null);
-        channel.enableVibration(true);
-        channel.setVibrationPattern(new long[]{100, 200, 300, 400, 500});
-
-        NotificationManager manager = context.getSystemService(NotificationManager.class);
-        manager.createNotificationChannel(channel);
-    }
-}
-
+// Logic Notifikasi Premium di NotificationHelper.java
 public static void showSuccessNotification(Context context, String queueNumber) {
-    // 3. Aksi saat Notifikasi Diklik (Membuka Aplikasi)
-    Intent intent = new Intent(context, MainActivity.class);
-    PendingIntent openAppPendingIntent = PendingIntent.getActivity(context, 0, intent, ...);
-
-    // 4. Aksi untuk Tombol "Bagikan"
-    Intent shareIntent = new Intent(Intent.ACTION_SEND);
-    shareIntent.putExtra(Intent.EXTRA_TEXT, "Nomor antrian saya..." + queueNumber);
-    PendingIntent sharePendingIntent = PendingIntent.getActivity(context, 1, ...);
-
-    // 5. Tampilan Notifikasi yang Bisa Diperluas
-    NotificationCompat.Style bigTextStyle = new NotificationCompat.BigTextStyle()
-            .bigText("RS. Harapan Sehat\n" + "Poli: Orthopaedi\n" + ...)
-            .setSummaryText("Detail Janji Temu");
-
     NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_calendar)
-            .setLargeIcon(BitmapFactory.decodeResource(..., R.mipmap.ic_launcher))
             .setContentTitle("Booking Berhasil! No Antrian: " + queueNumber)
-            .setContentText("Ketuk untuk detail atau lihat aksi di bawah.")
-            .setPriority(NotificationCompat.PRIORITY_HIGH) // Prioritas tinggi
-            .setSound(defaultSoundUri) // Bunyi notifikasi
-            .setVibrate(new long[]{100, 200, 300}) // Pola getar
-            .setContentIntent(openAppPendingIntent) // Aksi klik
-            .setStyle(bigTextStyle) // Tampilan diperluas
-            .setAutoCancel(true)
-            // 6. Tombol Aksi Interaktif
-            .addAction(R.drawable.ic_open_in_app, "Lihat Janji", openAppPendingIntent)
-            .addAction(R.drawable.ic_share, "Bagikan", sharePendingIntent);
-
-    NotificationManagerCompat.from(context).notify(1, builder.build());
+            .setStyle(new NotificationCompat.BigTextStyle().bigText("Pendaftaran Anda telah berhasil dikonfirmasi..."))
+            .addAction(R.drawable.ic_share, "Bagikan", sharePendingIntent)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true);
 }
 ```
 
-**Penjelasan Fitur Premium:**
-1.  **Prioritas Tinggi (`IMPORTANCE_HIGH`)**: Kunci agar notifikasi muncul sebagai *pop-up* di atas layar.
-2.  **Bunyi & Getar**: Memberikan umpan balik multisensori kepada pengguna.
-3.  **Aksi Klik (`PendingIntent`)**: Membuat notifikasi bisa diklik untuk membuka aplikasi.
-4.  **Tombol Bagikan**: Memungkinkan pengguna untuk berinteraksi lebih jauh dengan membagikan informasi.
-5.  **Tampilan Diperluas (`BigTextStyle`)**: Menyajikan informasi detail tanpa harus membuka aplikasi, memberikan pengalaman yang efisien.
-6.  **Tombol Aksi (`.addAction`)**: Menyediakan tombol interaktif langsung di dalam notifikasi untuk tindakan cepat.
+### 4. Persistence & Last Page Save
+Aplikasi mengingat posisi terakhir pengguna sebelum aplikasi ditutup (selama tidak di-kill).
+*   **Logic:** Menyimpan nama class activity terakhir ke SharedPreferences dan memuatnya kembali saat SplashActivity.
+
+```java
+// SplashActivity Logic untuk Persistence
+String lastPage = session.getLastPage();
+if (lastPage != null) {
+    try {
+        Class<?> activityClass = Class.forName(lastPage);
+        startActivity(new Intent(this, activityClass));
+    } catch (ClassNotFoundException e) {
+        startActivity(new Intent(this, MainActivity.class));
+    }
+}
+```
+
+### 5. Profil & Interaksi Tactile
+Manajemen data diri dengan pengalaman pengguna yang responsif.
+*   **Click Animation:** Memberikan efek visual (Scale Animation 0.97f) saat tombol ditekan untuk feedback tactile.
+*   **Real-time Profile Update:** Alamat, No. HP, dan Pekerjaan tersimpan secara permanen di memori lokal.
+
+---
+
+## 🛠️ Stack Teknologi
+*   **Backend & Auth:** Google Firebase (Auth & Cloud Messaging)
+*   **API Client:** Retrofit 2 & OkHttp 3 (Logging Interceptor)
+*   **Local Storage:** SharedPreferences (Session Manager)
+*   **Security:** AndroidX Biometric Library (Fingerprint & Face)
+*   **UI Components:** Material Design 3 (CardView, CoordinatorLayout, Custom Vectors)
+
+---
+
+## 📄 Struktur Proyek
+*   `com.vinaekal.sisehat.network`: Menangani komunikasi Firebase & API Service.
+*   `com.vinaekal.sisehat.util`: Berisi `NotificationHelper`, `Session Manager`, dan `SessionService` (Task Killer).
+*   `com.vinaekal.sisehat.model`: Data class untuk request dan response booking/auth.
+
+---
