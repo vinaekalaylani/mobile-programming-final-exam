@@ -13,31 +13,28 @@ import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
 import androidx.core.content.ContextCompat;
 
-import com.vinaekal.sisehat.model.request.LoginRequest;
-import com.vinaekal.sisehat.model.response.ApiResponse;
-import com.vinaekal.sisehat.model.content.LoginContent;
-import com.vinaekal.sisehat.network.ApiClient;
-import com.vinaekal.sisehat.network.ApiService;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.vinaekal.sisehat.util.Session;
+import com.vinaekal.sisehat.util.SessionService;
 
 import java.util.concurrent.Executor;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
     EditText editEmail, editPassword;
     Button buttonLogin, buttonBiometric;
     TextView textSubDescription;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // 🔹 Auto-login
+        mAuth = FirebaseAuth.getInstance();
+
+        // 🔹 Auto-login jika session masih ada
         Session session = new Session(this);
         if (session.isLoggedIn()) {
             startActivity(new Intent(this, MainActivity.class));
@@ -81,19 +78,18 @@ public class LoginActivity extends AppCompatActivity {
             public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
                 super.onAuthenticationSucceeded(result);
                 Session session = new Session(LoginActivity.this);
-                if (session.getUsername() != null && !session.getUsername().isEmpty()) {
-                    Toast.makeText(LoginActivity.this, "Login Berhasil", Toast.LENGTH_SHORT).show();
+                if (session.getToken() != null) {
+                    Toast.makeText(LoginActivity.this, "Login Berhasil (Biometrik)", Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(LoginActivity.this, MainActivity.class));
                     finish();
                 } else {
-                    Toast.makeText(LoginActivity.this, "Silakan login manual terlebih dahulu sekali", Toast.LENGTH_LONG).show();
+                    Toast.makeText(LoginActivity.this, "Silakan login manual terlebih dahulu untuk pertama kali", Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
             public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
                 super.onAuthenticationError(errorCode, errString);
-                Toast.makeText(getApplicationContext(), "Otentikasi error: " + errString, Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -105,7 +101,7 @@ public class LoginActivity extends AppCompatActivity {
 
         BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
                 .setTitle("Login Si Sehat")
-                .setSubtitle("Gunakan sidik jari, wajah, atau PIN/Pola Anda")
+                .setSubtitle("Gunakan sidik jari, wajah, atau PIN Anda")
                 .setAllowedAuthenticators(authenticators)
                 .build();
 
@@ -121,41 +117,36 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        ApiService apiService = ApiClient.getClient(this).create(ApiService.class);
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null) {
+                            Session session = new Session(LoginActivity.this);
+                            session.saveToken(user.getUid()); // Gunakan UID sebagai token
+                            session.saveUsername(user.getDisplayName() != null ? user.getDisplayName() : "User");
+                            session.saveProfile(user.getEmail(), "", "", "", "");
 
-        LoginRequest request = new LoginRequest(email, password);
+                            Toast.makeText(LoginActivity.this, "Login berhasil", Toast.LENGTH_SHORT).show();
 
-        apiService.login(request).enqueue(new Callback<ApiResponse<LoginContent>>() {
-            @Override
-            public void onResponse(Call<ApiResponse<LoginContent>> call, Response<ApiResponse<LoginContent>> response) {
+                            // Jalankan Service untuk deteksi kill task
+                            startService(new Intent(LoginActivity.this, SessionService.class));
 
-                if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<LoginContent> body = response.body();
-
-                    if ("0".equals(body.getCode())) {
-                        Session session = new Session(LoginActivity.this);
-                        session.saveToken(body.getContent().getToken());
-                        session.saveUsername(body.getContent().getUser().getUsername());
-                        session.saveUserId(body.getContent().getUser().getId());
-
-                        Toast.makeText(LoginActivity.this, "Login berhasil", Toast.LENGTH_SHORT).show();
-
-                        startActivity(new Intent(LoginActivity.this, MainActivity.class));
-                        finish();
-
+                            startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                            finish();
+                        }
                     } else {
-                        Toast.makeText(LoginActivity.this, body.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LoginActivity.this, "Login gagal: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                     }
+                });
+    }
 
-                } else {
-                    Toast.makeText(LoginActivity.this, "Server error", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ApiResponse<LoginContent>> call, Throwable t) {
-                Toast.makeText(LoginActivity.this, "Gagal koneksi ke server", Toast.LENGTH_SHORT).show();
-            }
-        });
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Session session = new Session(this);
+        if (session.isLoggedIn()) {
+            session.saveLastPage(getClass().getName());
+        }
     }
 }

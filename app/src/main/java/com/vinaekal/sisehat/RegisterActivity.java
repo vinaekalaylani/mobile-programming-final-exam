@@ -9,25 +9,22 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.vinaekal.sisehat.model.content.RegisterContent;
-import com.vinaekal.sisehat.model.request.RegisterRequest;
-import com.vinaekal.sisehat.model.response.ApiResponse;
-import com.vinaekal.sisehat.network.ApiClient;
-import com.vinaekal.sisehat.network.ApiService;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 
 public class RegisterActivity extends AppCompatActivity {
     EditText editFullname, editEmail, editPassword, editConfirmPassword;
     Button buttonRegister;
     TextView textLogin;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+
+        mAuth = FirebaseAuth.getInstance();
 
         editFullname = findViewById(R.id.editFullname);
         editEmail = findViewById(R.id.editEmail);
@@ -60,30 +57,25 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        ApiService apiService = ApiClient.getClient(this).create(ApiService.class);
-        RegisterRequest request = new RegisterRequest(fullname, email, pass);
+        mAuth.createUserWithEmailAndPassword(email, pass)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null) {
+                            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                    .setDisplayName(fullname)
+                                    .build();
 
-        apiService.register(request).enqueue(new Callback<ApiResponse<RegisterContent>>() {
-            @Override
-            public void onResponse(Call<ApiResponse<RegisterContent>> call, Response<ApiResponse<RegisterContent>> response) {
-
-                if (response.isSuccessful() && response.body() != null) {
-                    if ("0".equals(response.body().getCode())) {
-                        Toast.makeText(RegisterActivity.this, "Register berhasil, silakan login", Toast.LENGTH_SHORT).show();
-
-                        startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
-                        finish();
+                            user.updateProfile(profileUpdates)
+                                    .addOnCompleteListener(updateTask -> {
+                                        Toast.makeText(RegisterActivity.this, "Registrasi berhasil!", Toast.LENGTH_SHORT).show();
+                                        startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
+                                        finish();
+                                    });
+                        }
                     } else {
-                        Toast.makeText(RegisterActivity.this, response.body().getMessage(),Toast.LENGTH_SHORT).show();
+                        Toast.makeText(RegisterActivity.this, "Registrasi gagal: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                     }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ApiResponse<RegisterContent>> call, Throwable t) {
-                Toast.makeText(RegisterActivity.this, "Gagal koneksi ke server", Toast.LENGTH_SHORT).show();
-            }
-        });
+                });
     }
-
 }
