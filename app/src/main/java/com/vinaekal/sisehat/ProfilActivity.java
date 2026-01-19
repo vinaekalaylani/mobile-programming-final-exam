@@ -10,7 +10,9 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.vinaekal.sisehat.util.Session;
 
 public class ProfilActivity extends AppCompatActivity {
@@ -49,7 +51,7 @@ public class ProfilActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        logoutButton.setOnClickListener(v -> logout());
+        logoutButton.setOnClickListener(v -> showLogoutConfirmationDialog());
 
         setClickAnimation(editProfileButton);
         setClickAnimation(logoutButton);
@@ -82,7 +84,16 @@ public class ProfilActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void logout() {
+    private void showLogoutConfirmationDialog() {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("Keluar Aplikasi")
+                .setMessage("Apakah Anda yakin ingin keluar? Anda akan diminta login manual kembali dan fitur biometrik akan dinonaktifkan sementara demi keamanan.")
+                .setPositiveButton("Ya, Keluar", (dialog, which) -> performLogout())
+                .setNegativeButton("Batal", null)
+                .show();
+    }
+
+    private void performLogout() {
         session.logout();
         Intent intent = new Intent(this, LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);

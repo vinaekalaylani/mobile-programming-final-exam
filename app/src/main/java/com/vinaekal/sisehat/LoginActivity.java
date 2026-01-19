@@ -14,6 +14,7 @@ import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.vinaekal.sisehat.util.Session;
@@ -57,6 +58,7 @@ public class LoginActivity extends AppCompatActivity {
 
         setupBiometric();
 
+        // Munculkan prompt hanya jika sudah diberi izin sebelumnya
         if (!session.isLoggedIn() && session.canUseBiometric()) {
             triggerBiometricPrompt();
         }
@@ -64,18 +66,14 @@ public class LoginActivity extends AppCompatActivity {
 
     private void setupBiometric() {
         BiometricManager biometricManager = BiometricManager.from(this);
-        // Menggunakan kombinasi agar Face Unlock (Weak/Strong) dan Fingerprint terdeteksi
         int authenticators = BiometricManager.Authenticators.BIOMETRIC_STRONG 
                            | BiometricManager.Authenticators.BIOMETRIC_WEAK
                            | BiometricManager.Authenticators.DEVICE_CREDENTIAL;
 
-        switch (biometricManager.canAuthenticate(authenticators)) {
-            case BiometricManager.BIOMETRIC_SUCCESS:
-                buttonBiometric.setVisibility(View.VISIBLE);
-                break;
-            default:
-                buttonBiometric.setVisibility(View.GONE);
-                break;
+        if (biometricManager.canAuthenticate(authenticators) == BiometricManager.BIOMETRIC_SUCCESS) {
+            buttonBiometric.setVisibility(View.VISIBLE);
+        } else {
+            buttonBiometric.setVisibility(View.GONE);
         }
 
         buttonBiometric.setOnClickListener(v -> triggerBiometricPrompt());
@@ -88,19 +86,8 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
                 super.onAuthenticationSucceeded(result);
-                Toast.makeText(LoginActivity.this, "Otentikasi Berhasil", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(LoginActivity.this, MainActivity.class));
                 finish();
-            }
-
-            @Override
-            public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
-                super.onAuthenticationError(errorCode, errString);
-            }
-
-            @Override
-            public void onAuthenticationFailed() {
-                super.onAuthenticationFailed();
             }
         });
 
@@ -108,8 +95,7 @@ public class LoginActivity extends AppCompatActivity {
                 .setTitle("Otentikasi Si Sehat")
                 .setSubtitle("Gunakan Wajah, Sidik Jari, atau PIN")
                 .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG 
-                                         | BiometricManager.Authenticators.DEVICE_CREDENTIAL) 
-                // Catatan: DEVICE_CREDENTIAL biasanya butuh BIOMETRIC_STRONG pada setAllowedAuthenticators
+                                         | BiometricManager.Authenticators.DEVICE_CREDENTIAL)
                 .build();
 
         biometricPrompt.authenticate(promptInfo);
@@ -132,15 +118,34 @@ public class LoginActivity extends AppCompatActivity {
                             session.saveToken(user.getUid());
                             session.saveUsername(user.getDisplayName() != null ? user.getDisplayName() : "User");
                             session.saveProfile(user.getEmail(), "", "", "", "");
-                            session.setCanUseBiometric(true);
-
+                            
                             startService(new Intent(LoginActivity.this, SessionService.class));
-                            startActivity(new Intent(LoginActivity.this, MainActivity.class));
-                            finish();
+                            showBiometricActivationDialog();
                         }
                     } else {
                         Toast.makeText(LoginActivity.this, "Login gagal: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                     }
                 });
+    }
+
+    private void showBiometricActivationDialog() {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("Aktifkan Biometrik?")
+                .setMessage("Apakah Anda ingin mengaktifkan Sidik Jari/Wajah untuk login berikutnya agar lebih cepat?")
+                .setPositiveButton("Ya, Aktifkan", (dialog, which) -> {
+                    session.setCanUseBiometric(true);
+                    proceedToMain();
+                })
+                .setNegativeButton("Nanti Saja", (dialog, which) -> {
+                    session.setCanUseBiometric(false);
+                    proceedToMain();
+                })
+                .setCancelable(false)
+                .show();
+    }
+
+    private void proceedToMain() {
+        startActivity(new Intent(LoginActivity.this, MainActivity.class));
+        finish();
     }
 }
