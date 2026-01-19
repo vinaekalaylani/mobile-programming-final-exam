@@ -9,6 +9,7 @@ public class Session {
     private static final String KEY_TOKEN = "jwt_token";
     private static final String KEY_USERNAME = "username";
     private static final String KEY_USERID = "user_id";
+    private static final String KEY_LAST_PAGE = "last_page";
     
     // Additional profile fields
     private static final String KEY_EMAIL = "email";
@@ -23,6 +24,16 @@ public class Session {
     public Session(Context context) {
         pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         editor = pref.edit();
+    }
+
+    // ===== Last Page Persistence =====
+    public void saveLastPage(String activityName) {
+        editor.putString(KEY_LAST_PAGE, activityName);
+        editor.apply();
+    }
+
+    public String getLastPage() {
+        return pref.getString(KEY_LAST_PAGE, null);
     }
 
     // ===== Token =====

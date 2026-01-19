@@ -15,6 +15,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.SiSehat">
+
+        <service
+            android:name=".util.SessionService"
+            android:stopWithTask="false" />
+
         <activity
             android:name=".MainActivity"
             android:exported="false" />

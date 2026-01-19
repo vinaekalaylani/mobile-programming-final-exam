@@ -16,12 +16,13 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.vinaekal.sisehat.util.Session;
+
 public class SplashActivity extends AppCompatActivity {
 
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-                // Lanjutkan ke login setelah user merespons
-                proceedToLogin();
+                proceedToNextStep();
             });
 
     @Override
@@ -45,19 +46,40 @@ public class SplashActivity extends AppCompatActivity {
 
     private void askNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // Jika izin belum diberikan, tampilkan dialog permintaan
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
             } else {
-                proceedToLogin(); // Izin sudah ada, lanjutkan
+                proceedToNextStep();
             }
         } else {
-            proceedToLogin(); // Versi Android lama, tidak perlu izin
+            proceedToNextStep();
         }
     }
 
-    private void proceedToLogin() {
-        Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
+    private void proceedToNextStep() {
+        Session session = new Session(this);
+        if (!session.isLoggedIn()) {
+            startActivity(new Intent(SplashActivity.this, LoginActivity.class));
+            finish();
+            return;
+        }
+
+        String lastPage = session.getLastPage();
+        Intent intent;
+
+        if (lastPage != null) {
+            try {
+                // Mencoba memuat Activity terakhir yang disimpan
+                Class<?> activityClass = Class.forName(lastPage);
+                intent = new Intent(SplashActivity.this, activityClass);
+            } catch (ClassNotFoundException e) {
+                // Jika class tidak ditemukan, kembali ke MainActivity
+                intent = new Intent(SplashActivity.this, MainActivity.class);
+            }
+        } else {
+            intent = new Intent(SplashActivity.this, MainActivity.class);
+        }
+
         startActivity(intent);
         finish();
     }
