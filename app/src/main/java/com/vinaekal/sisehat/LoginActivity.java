@@ -2,37 +2,42 @@ package com.vinaekal.sisehat;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.biometric.BiometricManager;
+import androidx.biometric.BiometricPrompt;
+import androidx.core.content.ContextCompat;
 
-import com.vinaekal.sisehat.model.request.LoginRequest;
-import com.vinaekal.sisehat.model.response.ApiResponse;
-import com.vinaekal.sisehat.model.content.LoginContent;
-import com.vinaekal.sisehat.network.ApiClient;
-import com.vinaekal.sisehat.network.ApiService;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.vinaekal.sisehat.util.Session;
+import com.vinaekal.sisehat.util.SessionService;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import java.util.concurrent.Executor;
 
 public class LoginActivity extends AppCompatActivity {
 
-    EditText editEmail, editPassword;
-    Button buttonLogin;
-    TextView textSubDescription;
+    private EditText editEmail, editPassword;
+    private Button buttonLogin, buttonBiometric;
+    private TextView textSubDescription;
+    private FirebaseAuth mAuth;
+    private Session session;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // 🔹 Auto-login
-        Session session = new Session(this);
+        mAuth = FirebaseAuth.getInstance();
+        session = new Session(this);
+
         if (session.isLoggedIn()) {
             startActivity(new Intent(this, MainActivity.class));
             finish();
@@ -42,14 +47,58 @@ public class LoginActivity extends AppCompatActivity {
         editEmail = findViewById(R.id.editEmail);
         editPassword = findViewById(R.id.editPassword);
         buttonLogin = findViewById(R.id.buttonLogin);
+        buttonBiometric = findViewById(R.id.buttonBiometric);
         textSubDescription = findViewById(R.id.textSubDescription);
 
         buttonLogin.setOnClickListener(v -> login());
-
         textSubDescription.setOnClickListener(v -> {
             startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
             finish();
         });
+
+        setupBiometric();
+
+        // Munculkan prompt hanya jika sudah diberi izin sebelumnya
+        if (!session.isLoggedIn() && session.canUseBiometric()) {
+            triggerBiometricPrompt();
+        }
+    }
+
+    private void setupBiometric() {
+        BiometricManager biometricManager = BiometricManager.from(this);
+        int authenticators = BiometricManager.Authenticators.BIOMETRIC_STRONG 
+                           | BiometricManager.Authenticators.BIOMETRIC_WEAK
+                           | BiometricManager.Authenticators.DEVICE_CREDENTIAL;
+
+        if (biometricManager.canAuthenticate(authenticators) == BiometricManager.BIOMETRIC_SUCCESS) {
+            buttonBiometric.setVisibility(View.VISIBLE);
+        } else {
+            buttonBiometric.setVisibility(View.GONE);
+        }
+
+        buttonBiometric.setOnClickListener(v -> triggerBiometricPrompt());
+    }
+
+    private void triggerBiometricPrompt() {
+        Executor executor = ContextCompat.getMainExecutor(this);
+        BiometricPrompt biometricPrompt = new BiometricPrompt(LoginActivity.this,
+                executor, new BiometricPrompt.AuthenticationCallback() {
+            @Override
+            public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
+                super.onAuthenticationSucceeded(result);
+                startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                finish();
+            }
+        });
+
+        BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
+                .setTitle("Otentikasi Si Sehat")
+                .setSubtitle("Gunakan Wajah, Sidik Jari, atau PIN")
+                .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG 
+                                         | BiometricManager.Authenticators.DEVICE_CREDENTIAL)
+                .build();
+
+        biometricPrompt.authenticate(promptInfo);
     }
 
     private void login() {
@@ -61,41 +110,42 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        ApiService apiService = ApiClient.getClient(this).create(ApiService.class);
-
-        LoginRequest request = new LoginRequest(email, password);
-
-        apiService.login(request).enqueue(new Callback<ApiResponse<LoginContent>>() {
-            @Override
-            public void onResponse(Call<ApiResponse<LoginContent>> call, Response<ApiResponse<LoginContent>> response) {
-
-                if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<LoginContent> body = response.body();
-
-                    if ("0".equals(body.getCode())) {
-                        Session session = new Session(LoginActivity.this);
-                        session.saveToken(body.getContent().getToken());
-                        session.saveUsername(body.getContent().getUser().getUsername());
-                        session.saveUserId(body.getContent().getUser().getId());
-
-                        Toast.makeText(LoginActivity.this, "Login berhasil", Toast.LENGTH_SHORT).show();
-
-                        startActivity(new Intent(LoginActivity.this, MainActivity.class));
-                        finish();
-
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null) {
+                            session.saveToken(user.getUid());
+                            session.saveUsername(user.getDisplayName() != null ? user.getDisplayName() : "User");
+                            session.saveProfile(user.getEmail(), "", "", "", "");
+                            
+                            startService(new Intent(LoginActivity.this, SessionService.class));
+                            showBiometricActivationDialog();
+                        }
                     } else {
-                        Toast.makeText(LoginActivity.this, body.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LoginActivity.this, "Login gagal: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                     }
+                });
+    }
 
-                } else {
-                    Toast.makeText(LoginActivity.this, "Server error", Toast.LENGTH_SHORT).show();
-                }
-            }
+    private void showBiometricActivationDialog() {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("Aktifkan Biometrik?")
+                .setMessage("Apakah Anda ingin mengaktifkan Sidik Jari/Wajah untuk login berikutnya agar lebih cepat?")
+                .setPositiveButton("Ya, Aktifkan", (dialog, which) -> {
+                    session.setCanUseBiometric(true);
+                    proceedToMain();
+                })
+                .setNegativeButton("Nanti Saja", (dialog, which) -> {
+                    session.setCanUseBiometric(false);
+                    proceedToMain();
+                })
+                .setCancelable(false)
+                .show();
+    }
 
-            @Override
-            public void onFailure(Call<ApiResponse<LoginContent>> call, Throwable t) {
-                Toast.makeText(LoginActivity.this, "Gagal koneksi ke server", Toast.LENGTH_SHORT).show();
-            }
-        });
+    private void proceedToMain() {
+        startActivity(new Intent(LoginActivity.this, MainActivity.class));
+        finish();
     }
 }

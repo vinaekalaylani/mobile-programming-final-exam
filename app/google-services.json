@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "87112780494",
+    "project_id": "si-sehat-84d91",
+    "storage_bucket": "si-sehat-84d91.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:87112780494:android:27c6e33086a067bf075e9f",
+        "android_client_info": {
+          "package_name": "com.vinaekal.sisehat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCZIrOefQMxBuZfqpNWGbX-IjpE_X_T5Rg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

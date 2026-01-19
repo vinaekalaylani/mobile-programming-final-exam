@@ -6,6 +6,8 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
@@ -16,11 +18,18 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.vinaekal.sisehat.util.Session;
+
+import java.security.KeyStore;
+
+import javax.crypto.KeyGenerator;
+
 public class SplashActivity extends AppCompatActivity {
+
+    private static final String KEY_ALIAS = "SiSehatInstallKey";
 
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-                // Lanjutkan ke login setelah user merespons
                 proceedToLogin();
             });
 
@@ -35,30 +44,57 @@ public class SplashActivity extends AppCompatActivity {
             return insets;
         });
 
+        // 🔹 CEK INSTALASI BARU LEWAT KEYSTORE
+        checkFirstInstall();
+
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
                 askNotificationPermission();
             }
-        }, 3000);
+        }, 2000);
+    }
+
+    private void checkFirstInstall() {
+        try {
+            KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+            keyStore.load(null);
+
+            // Jika alias tidak ditemukan, berarti ini install baru atau data dihapus
+            if (!keyStore.containsAlias(KEY_ALIAS)) {
+                // Hapus session (jika ada data yang ter-restore otomatis dari Google Cloud)
+                Session session = new Session(this);
+                session.logout(); 
+
+                // Buat kunci baru agar ke depannya dikenali sebagai "bukan install baru"
+                KeyGenerator keyGenerator = KeyGenerator.getInstance(
+                        KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
+                keyGenerator.init(new KeyGenParameterSpec.Builder(KEY_ALIAS,
+                        KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                        .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                        .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                        .build());
+                keyGenerator.generateKey();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void askNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // Jika izin belum diberikan, tampilkan dialog permintaan
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
             } else {
-                proceedToLogin(); // Izin sudah ada, lanjutkan
+                proceedToLogin();
             }
         } else {
-            proceedToLogin(); // Versi Android lama, tidak perlu izin
+            proceedToLogin();
         }
     }
 
     private void proceedToLogin() {
-        Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
-        startActivity(intent);
+        startActivity(new Intent(SplashActivity.this, LoginActivity.class));
         finish();
     }
 }

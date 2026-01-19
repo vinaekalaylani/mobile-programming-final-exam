@@ -9,6 +9,8 @@ public class Session {
     private static final String KEY_TOKEN = "jwt_token";
     private static final String KEY_USERNAME = "username";
     private static final String KEY_USERID = "user_id";
+    private static final String KEY_LAST_PAGE = "last_page";
+    private static final String KEY_CAN_USE_BIOMETRIC = "can_use_biometric";
     
     // Additional profile fields
     private static final String KEY_EMAIL = "email";
@@ -23,6 +25,26 @@ public class Session {
     public Session(Context context) {
         pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         editor = pref.edit();
+    }
+
+    // ===== Biometric State =====
+    public void setCanUseBiometric(boolean canUse) {
+        editor.putBoolean(KEY_CAN_USE_BIOMETRIC, canUse);
+        editor.apply();
+    }
+
+    public boolean canUseBiometric() {
+        return pref.getBoolean(KEY_CAN_USE_BIOMETRIC, false);
+    }
+
+    // ===== Last Page Persistence =====
+    public void saveLastPage(String activityName) {
+        editor.putString(KEY_LAST_PAGE, activityName);
+        editor.apply();
+    }
+
+    public String getLastPage() {
+        return pref.getString(KEY_LAST_PAGE, null);
     }
 
     // ===== Token =====
@@ -52,7 +74,7 @@ public class Session {
     }
 
     public int getUserId() {
-        return pref.getInt(KEY_USERID, -1); // -1 jika belum ada
+        return pref.getInt(KEY_USERID, -1);
     }
 
     // ===== Profile Fields =====
@@ -71,12 +93,21 @@ public class Session {
     public String getAddress() { return pref.getString(KEY_ADDRESS, ""); }
     public String getJob() { return pref.getString(KEY_JOB, ""); }
 
-    // ===== Clear / Logout =====
-    public void clear() {
-        editor.clear().apply();
+    // ===== Logout (Explicit) =====
+    public void logout() {
+        editor.clear();
+        editor.putBoolean(KEY_CAN_USE_BIOMETRIC, false); // Matikan biometrik saat logout manual
+        editor.apply();
     }
 
-    // ===== Check login =====
+    // ===== Kill Task (Clear session only) =====
+    public void clearSessionOnly() {
+        editor.remove(KEY_TOKEN);
+        editor.remove(KEY_LAST_PAGE);
+        editor.apply();
+        // can_use_biometric TETAP TRUE agar bisa login sidik jari setelah di-kill
+    }
+
     public boolean isLoggedIn() {
         return getToken() != null;
     }
