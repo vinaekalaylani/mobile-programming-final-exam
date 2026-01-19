@@ -37,7 +37,6 @@ public class LoginActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         session = new Session(this);
 
-        // Auto-login jika token benar-benar masih ada (tidak di-kill)
         if (session.isLoggedIn()) {
             startActivity(new Intent(this, MainActivity.class));
             finish();
@@ -51,7 +50,6 @@ public class LoginActivity extends AppCompatActivity {
         textSubDescription = findViewById(R.id.textSubDescription);
 
         buttonLogin.setOnClickListener(v -> login());
-
         textSubDescription.setOnClickListener(v -> {
             startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
             finish();
@@ -59,7 +57,6 @@ public class LoginActivity extends AppCompatActivity {
 
         setupBiometric();
 
-        // 🔹 LOGIC: Jika aplikasi di-kill, token hilang tapi canUseBiometric masih TRUE
         if (!session.isLoggedIn() && session.canUseBiometric()) {
             triggerBiometricPrompt();
         }
@@ -67,7 +64,10 @@ public class LoginActivity extends AppCompatActivity {
 
     private void setupBiometric() {
         BiometricManager biometricManager = BiometricManager.from(this);
-        int authenticators = BiometricManager.Authenticators.BIOMETRIC_STRONG | BiometricManager.Authenticators.DEVICE_CREDENTIAL;
+        // Menggunakan kombinasi agar Face Unlock (Weak/Strong) dan Fingerprint terdeteksi
+        int authenticators = BiometricManager.Authenticators.BIOMETRIC_STRONG 
+                           | BiometricManager.Authenticators.BIOMETRIC_WEAK
+                           | BiometricManager.Authenticators.DEVICE_CREDENTIAL;
 
         switch (biometricManager.canAuthenticate(authenticators)) {
             case BiometricManager.BIOMETRIC_SUCCESS:
@@ -88,7 +88,6 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
                 super.onAuthenticationSucceeded(result);
-                // Biometrik berhasil -> paksa masuk karena user sudah terverifikasi secara hardware
                 Toast.makeText(LoginActivity.this, "Otentikasi Berhasil", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(LoginActivity.this, MainActivity.class));
                 finish();
@@ -107,8 +106,10 @@ public class LoginActivity extends AppCompatActivity {
 
         BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
                 .setTitle("Otentikasi Si Sehat")
-                .setSubtitle("Gunakan Sidik Jari/Wajah/PIN")
-                .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG | BiometricManager.Authenticators.DEVICE_CREDENTIAL)
+                .setSubtitle("Gunakan Wajah, Sidik Jari, atau PIN")
+                .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG 
+                                         | BiometricManager.Authenticators.DEVICE_CREDENTIAL) 
+                // Catatan: DEVICE_CREDENTIAL biasanya butuh BIOMETRIC_STRONG pada setAllowedAuthenticators
                 .build();
 
         biometricPrompt.authenticate(promptInfo);
@@ -131,7 +132,7 @@ public class LoginActivity extends AppCompatActivity {
                             session.saveToken(user.getUid());
                             session.saveUsername(user.getDisplayName() != null ? user.getDisplayName() : "User");
                             session.saveProfile(user.getEmail(), "", "", "", "");
-                            session.setCanUseBiometric(true); // Aktifkan biometrik setelah login manual sukses
+                            session.setCanUseBiometric(true);
 
                             startService(new Intent(LoginActivity.this, SessionService.class));
                             startActivity(new Intent(LoginActivity.this, MainActivity.class));

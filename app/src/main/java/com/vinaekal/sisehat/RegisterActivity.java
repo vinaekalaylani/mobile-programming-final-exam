@@ -12,12 +12,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.vinaekal.sisehat.util.Session;
 
 public class RegisterActivity extends AppCompatActivity {
     EditText editFullname, editEmail, editPassword, editConfirmPassword;
     Button buttonRegister;
     TextView textLogin;
     private FirebaseAuth mAuth;
+    private Session session;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +27,7 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
 
         mAuth = FirebaseAuth.getInstance();
+        session = new Session(this);
 
         editFullname = findViewById(R.id.editFullname);
         editEmail = findViewById(R.id.editEmail);
@@ -68,6 +71,9 @@ public class RegisterActivity extends AppCompatActivity {
 
                             user.updateProfile(profileUpdates)
                                     .addOnCompleteListener(updateTask -> {
+                                        // Aktifkan Biometrik setelah registrasi berhasil
+                                        session.setCanUseBiometric(true);
+                                        
                                         Toast.makeText(RegisterActivity.this, "Registrasi berhasil!", Toast.LENGTH_SHORT).show();
                                         startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
                                         finish();
